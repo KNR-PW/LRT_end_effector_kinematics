@@ -17,6 +17,8 @@ set(THIS_PACKAGE_DEPENDS
   geometry_msgs
   trajectory_msgs
   control_msgs
+  ocs2_pinocchio_interface
+  ocs2_robotic_tools 
 )
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_DEPENDS})
   find_package(${Dependency} REQUIRED)
