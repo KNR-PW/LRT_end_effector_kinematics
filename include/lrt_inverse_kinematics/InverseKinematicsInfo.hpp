@@ -1,5 +1,5 @@
-#ifndef __LRT_END_EFFECTOR_KINEMATICS_INFO__
-#define __LRT_END_EFFECTOR_KINEMATICS_INFO__
+#ifndef __LRT_INVERSE_KINEMATICS_INFO__
+#define __LRT_INVERSE_KINEMATICS_INFO__
 
 
 #include <pinocchio/fwd.hpp>  // forward declarations must be included first.
@@ -8,15 +8,15 @@
 #include <ocs2_pinocchio_interface/PinocchioInterface.h>
 
 
-namespace end_effector_kinematics
+namespace lrt_inverse_kinematics
 {
-  struct EndEffectorKinematicsInfo
+
+  struct IKModelInfo
   {
-    EndEffectorKinematicsInfo(const ocs2::PinocchioInterface& interface,
+    IKModelInfo(const ocs2::PinocchioInterface& interface,
+      const std::string& baseFrameName,
       const std::vector<std::string>& threeDofEndEffectorNames,
-      const std::vector<std::string>& sixDofEndEffectorNames,
-      const size_t stateDim,
-      const size_t inputDim);
+      const std::vector<std::string>& sixDofEndEffectorNames);
     
     size_t baseFrameIndex;                        // base frame index (frame that forward and inverse kinematics
                                                   // are defined )
@@ -26,7 +26,22 @@ namespace end_effector_kinematics
     std::vector<size_t> endEffectorFrameIndices;  // indices of end-effector frames [3DOF end effectors, 6DOF end effectors]
     std::vector<size_t> endEffectorJointIndices;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
   };
+
+  enum class SolverType: uint8_t
+  {
+    DIFFERENTIAL = 0,
+    DIFFERENTIAL_DAMPED = 1,
+    OPTIMIZATION_BASED = 2,
+  };
+
+  struct IKSolverInfo
+  {
+    unsigned max_iterations_ = 100;
+    double tolerance_ = 1e-6;
+    double minimum_step_size = 1e-6;
+    double damping_coefficient = 1e-4; 
+  };
   
-}; // namespace legged_locomotion_mpc
+}; // namespace lrt_inverse_kinematics
 
 #endif
