@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(end_effector_kinematics)
+project(lrt_inverse_kinematics)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -27,8 +27,7 @@ endforeach()
 include_directories(include)
 
 add_executable(EndEffectorKinematics
-  src/MultiEndEffectorKinematics.cpp
-  src/QuadrupedBaseController.cpp
+  src/solvers/differential_solvers/DifferentialSolver.cpp
   src/main.cpp
 )
 
