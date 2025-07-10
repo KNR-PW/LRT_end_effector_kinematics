@@ -13,33 +13,29 @@ namespace lrt_inverse_kinematics
 
   struct IKModelInfo
   {
-    IKModelInfo(const ocs2::PinocchioInterface& interface,
+    IKModelInfo(const std::string urdfPath,
       const std::string& baseFrameName,
       const std::vector<std::string>& threeDofEndEffectorNames,
       const std::vector<std::string>& sixDofEndEffectorNames);
-    
-    size_t baseFrameIndex;                        // base frame index (frame that forward and inverse kinematics
-                                                  // are defined )
-    size_t numEndEffectors;                       // Number of all end effectors
-    size_t numThreeDofEndEffectors;               // 3DOF end effectors, position only
-    size_t numSixDofEndEffectors;                 // 6DOF end effectors, position and orientation
-    std::vector<size_t> endEffectorFrameIndices;  // indices of end-effector frames [3DOF end effectors, 6DOF end effectors]
-    std::vector<size_t> endEffectorJointIndices;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
-  };
 
-  enum class SolverType: uint8_t
-  {
-    DIFFERENTIAL = 0,
-    DIFFERENTIAL_DAMPED = 1,
-    OPTIMIZATION_BASED = 2,
+
+    ocs2::PinocchioInterface& pinocchioInterface_; // ocs2 pinocchio interface
+    
+    size_t baseFrameIndex_;                        // base frame index (frame that forward and inverse kinematics are defined)
+    size_t numEndEffectors_;                       // Number of all end effectors
+    size_t numThreeDofEndEffectors_;               // 3DOF end effectors, position only
+    size_t numSixDofEndEffectors_;                 // 6DOF end effectors, position and orientation
+    std::vector<size_t> endEffectorFrameIndices_;  // indices of end-effector frames [3DOF end effectors, 6DOF end effectors]
+    std::vector<size_t> endEffectorJointIndices_;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
+
   };
 
   struct IKSolverInfo
   {
-    unsigned max_iterations_ = 100;
+    unsigned maxIterations_ = 100;
     double tolerance_ = 1e-6;
-    double minimum_step_size = 1e-6;
-    double damping_coefficient = 1e-4; 
+    double minimumStepSize_ = 1e-6;
+    double dampingCoefficient_ = 1e-4; 
   };
   
 }; // namespace lrt_inverse_kinematics
