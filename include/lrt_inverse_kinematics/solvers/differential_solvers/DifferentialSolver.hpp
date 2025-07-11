@@ -13,7 +13,7 @@ namespace lrt_inverse_kinematics
     DifferentialSolver(IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
 
     Eigen::VectorXd getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
-                                   const VectorXd& error) override final;
+                                   const Eigen::VectorXd& error) override final;
 
     virtual Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions) = 0;
 

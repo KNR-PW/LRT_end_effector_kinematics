@@ -2,10 +2,17 @@
 #define __LRT_INVERSE_KINEMATICS_INFO__
 
 
+#include <string>
+#include <vector>
+#include <stdexcept>
+
+#include <urdf_parser/urdf_parser.h>
+
 #include <pinocchio/fwd.hpp>  // forward declarations must be included first.
 #include <pinocchio/multibody/model.hpp>
 
 #include <ocs2_pinocchio_interface/PinocchioInterface.h>
+#include <ocs2_pinocchio_interface/urdf.h>
 
 
 namespace lrt_inverse_kinematics
@@ -13,8 +20,8 @@ namespace lrt_inverse_kinematics
 
   struct IKModelInfo
   {
-    IKModelInfo(const std::string urdfPath,
-      const std::string& baseFrameName,
+    IKModelInfo(const std::string urdfFilePath,
+      const std::string& baseLinkName,
       const std::vector<std::string>& threeDofEndEffectorNames,
       const std::vector<std::string>& sixDofEndEffectorNames);
 
@@ -36,6 +43,7 @@ namespace lrt_inverse_kinematics
     double tolerance_ = 1e-6;
     double minimumStepSize_ = 1e-6;
     double dampingCoefficient_ = 1e-4; 
+    double stepCoefficient_ = 0.5; // > 0
   };
   
 }; // namespace lrt_inverse_kinematics

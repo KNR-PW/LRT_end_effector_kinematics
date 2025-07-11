@@ -4,7 +4,7 @@ namespace lrt_inverse_kinematics
 {
 
   Eigen::VectorXd DifferentialSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
-                               const VectorXd& error)
+                               const Eigen::VectorXd& error)
   {
     Eigen::VectorXd jointDeltas;
     Eigen::MatrixXd gradient = getGradient(actualJointPositions);

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <Eigen/Dense>
-#include <pinocchio/fwd>
+#include <pinocchio/fwd.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 
 #include <lrt_inverse_kinematics/InverseKinematicsInfo.hpp>
@@ -13,8 +13,8 @@ namespace lrt_inverse_kinematics
 {
   enum class SolverType: uint8_t
   {
-    DIFFERENTIAL = 0,
-    OPTIMIZATION = 2,
+    ITERATIONAL = 0,
+    OPTIMIZATION = 1,
   };
 
   enum class TaskType: uint8_t
@@ -32,17 +32,20 @@ namespace lrt_inverse_kinematics
     InverseSolverInterface(IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
 
     virtual Eigen::VectorXd getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
-                                           const VectorXd& error) = 0;
+                                           const Eigen::VectorXd& error) = 0;
 
     SolverType getSolverType();
+
+    const std::string& getSolverName();
     
     virtual ~InverseSolverInterface() = default;
 
-    private:
+    protected:
 
     IKModelInfo* modelInfo_;
     const IKSolverInfo* solverInfo_;
-
+    
+    std::string solverName_;
     SolverType solverType_;
     TaskType taskType_;
 

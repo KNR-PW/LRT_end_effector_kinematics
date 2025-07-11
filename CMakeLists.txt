@@ -28,10 +28,11 @@ include_directories(include)
 
 add_executable(EndEffectorKinematics
   src/solvers/differential_solvers/DifferentialSolver.cpp
+  src/InverseKinematicsInfo.cpp
   src/main.cpp
 )
 
-
+ament_target_dependencies(EndEffectorKinematics ${THIS_PACKAGE_DEPENDS})
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
