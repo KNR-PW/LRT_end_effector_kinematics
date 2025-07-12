@@ -1,0 +1,45 @@
+#include <lrt_inverse_kinematics/solvers/iterational/NewtonRaphsonSolver.hpp>
+
+namespace lrt_inverse_kinematics
+{
+  NewtonRaphsonSolver::NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
+    IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
+      IterationalSolver(pinocchioInterface, modelInfo, solverInfo)
+  {
+    solverName_ = "NewtonRaphson";
+  }
+
+  Eigen::MatrixXd NewtonRaphsonSolver::getGradient(const Eigen::VectorXd& actualJointPositions)
+  {
+    const auto& model = pinocchioInterface_->getModel();
+    auto& data = pinocchioInterface_->getData();
+
+    pinocchio::computeJointJacobians(model, data, actualJointPositions);
+
+    const size_t rowSize = 3 * modelInfo_->numThreeDofEndEffectors_ + 6 * modelInfo_->numSixDofEndEffectors_;
+
+    Eigen::MatrixXd gradient(rowSize, model.nq);
+
+    for(size_t i = 0; i < modelInfo_->numThreeDofEndEffectors_; ++i)
+    {
+      const size_t frameIndex = modelInfo_->endEffectorFrameIndices_[i];
+      const size_t rowStartIndex = 3 * i;
+      gradient.middleRows<3>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
+    }
+
+    for(size_t i = modelInfo_->numThreeDofEndEffectors_; i < modelInfo_->numEndEffectors_; ++i)
+    {
+      const size_t frameIndex = modelInfo_->endEffectorFrameIndices_[i];
+      const size_t rowStartIndex = 6 * i - 3 * modelInfo_->numThreeDofEndEffectors_;
+      gradient.middleRows<6>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
+    }
+
+    return gradient;
+  }
+
+  const std::string& NewtonRaphsonSolver::getSolverName()
+  {
+    return solverName_;
+  }
+
+}

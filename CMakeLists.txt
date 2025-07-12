@@ -28,7 +28,8 @@ include_directories(include)
 
 add_executable(EndEffectorKinematics
   src/solvers/InverseSolverInterface.cpp
-  src/solvers/iterational_solvers/IterationalSolver.cpp
+  src/solvers/iterational/IterationalSolver.cpp
+  src/solvers/iterational/NewtonRaphson.cpp
   src/InverseKinematics.cpp
   src/main.cpp
 )

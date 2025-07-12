@@ -20,7 +20,9 @@ namespace lrt_inverse_kinematics
 
     virtual Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions) = 0;
 
-    virtual ~IterationalSolver() = 0;
+    SolverType getSolverType() override final;
+
+    virtual ~IterationalSolver() = default;
 
   };
 

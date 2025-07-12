@@ -1,10 +1,13 @@
-#include <lrt_inverse_kinematics/solvers/iterational_solvers/IterationalSolver.hpp>
+#include <lrt_inverse_kinematics/solvers/iterational/IterationalSolver.hpp>
 
 namespace lrt_inverse_kinematics
 {
   IterationalSolver::IterationalSolver(ocs2::PinocchioInterface& pinocchioInterface,
     IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
-      InverseSolverInterface(pinocchioInterface, modelInfo, solverInfo){}
+      InverseSolverInterface(pinocchioInterface, modelInfo, solverInfo)
+  {
+    solverType_ = SolverType::ITERATIONAL;
+  }
 
   bool IterationalSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
     const Eigen::VectorXd& error,
@@ -35,6 +38,11 @@ namespace lrt_inverse_kinematics
         break;
     }
     return true;
+  }
+
+  SolverType IterationalSolver::getSolverType()
+  {
+    return solverType_;
   }
 
 };
