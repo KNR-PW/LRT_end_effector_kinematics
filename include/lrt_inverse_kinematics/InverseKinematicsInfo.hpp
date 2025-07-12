@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <memory>
 
 #include <urdf_parser/urdf_parser.h>
 
@@ -21,12 +22,12 @@ namespace lrt_inverse_kinematics
   struct IKModelInfo
   {
     IKModelInfo(const std::string urdfFilePath,
-      const std::string& baseLinkName,
+      const std::string baseLinkName,
       const std::vector<std::string>& threeDofEndEffectorNames,
       const std::vector<std::string>& sixDofEndEffectorNames);
 
 
-    ocs2::PinocchioInterface& pinocchioInterface_; // ocs2 pinocchio interface
+    std::unique_ptr<ocs2::PinocchioInterface> pinocchioInterface_; // ocs2 pinocchio interface
     
     size_t baseFrameIndex_;                        // base frame index (frame that forward and inverse kinematics are defined)
     size_t numEndEffectors_;                       // Number of all end effectors

@@ -3,7 +3,7 @@
 namespace lrt_inverse_kinematics
 {
   IKModelInfo::IKModelInfo(const std::string urdfFilePath,
-    const std::string& baseLinkName,
+    const std::string baseLinkName,
     const std::vector<std::string>& threeDofEndEffectorNames,
     const std::vector<std::string>& sixDofEndEffectorNames)
   {
@@ -15,7 +15,7 @@ namespace lrt_inverse_kinematics
       throw std::invalid_argument("The file " + urdfFilePath + " does not contain a valid URDF model!");
     }
 
-    if(baseLinkName == "")
+    if(baseLinkName != "")
     {
       // remove extraneous joints from urdf
       std::vector<std::string> jointsToRemove;
@@ -78,11 +78,10 @@ namespace lrt_inverse_kinematics
         throw;
       }
     }
+    
+    pinocchioInterface_ = std::make_unique<ocs2::PinocchioInterface>(ocs2::getPinocchioInterfaceFromUrdfModel(urdfTree));
 
-    pinocchioInterface_ = ocs2::getPinocchioInterfaceFromUrdfModel(urdfTree);
-
-
-    const pinocchio::Model& model = pinocchioInterface_.getModel();
+    const pinocchio::Model& model = pinocchioInterface_->getModel();
 
     numThreeDofEndEffectors_ = threeDofEndEffectorNames.size();
     numSixDofEndEffectors_ = sixDofEndEffectorNames.size();
