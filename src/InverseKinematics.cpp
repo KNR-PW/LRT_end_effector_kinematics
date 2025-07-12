@@ -186,7 +186,6 @@ namespace lrt_inverse_kinematics
     std::pair<bool, ReturnFlag> returnValue = std::make_pair(true, ReturnFlag::IN_PROGRESS);
 
     size_t iteration = 0;
-    Eigen::VectorXd error = Eigen::VectorXd::Ones(3 * modelInfo_.numThreeDofEndEffectors_ + 6 * modelInfo_.numSixDofEndEffectors_);
 
     newJointPositions = actualJointPositions;
 
@@ -194,7 +193,7 @@ namespace lrt_inverse_kinematics
     {
       pinocchio::framesForwardKinematics(model, data, newJointPositions);
 
-      error = getErrorPositions(actualJointPositions, endEffectorPositions, endEffectorTransforms);
+      const Eigen::VectorXd error = getErrorPositions(actualJointPositions, endEffectorPositions, endEffectorTransforms);
 
       if(error.norm() < solverInfo_.tolerance_)
       {
@@ -241,7 +240,7 @@ namespace lrt_inverse_kinematics
     for(size_t i = 0; i < modelInfo_.numThreeDofEndEffectors_; ++i)
     {
       const size_t frameIndex = modelInfo_.endEffectorFrameIndices_[i];
-      error << endEffectorPositions[i] - data.oMf[frameIndex].translation();
+      error << data.oMf[frameIndex].rotation().transpose() * (endEffectorPositions[i] - data.oMf[frameIndex].translation());
     }
 
     for(size_t i = modelInfo_.numThreeDofEndEffectors_; i < modelInfo_.numEndEffectors_; ++i)
