@@ -2,7 +2,10 @@
 #define __LRT_INVERSE_SOLVER_INTERFACE__
 
 #include <vector>
+#include <stdexcept>
+
 #include <Eigen/Dense>
+
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 
@@ -29,24 +32,32 @@ namespace lrt_inverse_kinematics
 
     public:
 
-    InverseSolverInterface(IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
+    InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
+      IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
 
-    virtual Eigen::VectorXd getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
-                                           const Eigen::VectorXd& error) = 0;
+    virtual bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
+      const Eigen::VectorXd& error,
+      Eigen::VectorXd& jointDeltas) = 0;
 
-    SolverType getSolverType();
+    virtual SolverType getSolverType() = 0;
 
-    const std::string& getSolverName();
+    virtual const std::string& getSolverName() = 0;
+
+    TaskType getTaskType();
     
     virtual ~InverseSolverInterface() = default;
 
     protected:
-
-    IKModelInfo* modelInfo_;
+    
+    ocs2::PinocchioInterface* pinocchioInterface_;
+    const IKModelInfo* modelInfo_;
     const IKSolverInfo* solverInfo_;
     
     std::string solverName_;
     SolverType solverType_;
+    
+    private:
+
     TaskType taskType_;
 
   };

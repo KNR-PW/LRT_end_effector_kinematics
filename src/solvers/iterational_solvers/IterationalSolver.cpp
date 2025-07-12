@@ -1,14 +1,17 @@
-#include <lrt_inverse_kinematics/solvers/differential_solvers/DifferentialSolver.hpp>
+#include <lrt_inverse_kinematics/solvers/iterational_solvers/IterationalSolver.hpp>
 
 namespace lrt_inverse_kinematics
 {
+  IterationalSolver::IterationalSolver(ocs2::PinocchioInterface& pinocchioInterface,
+    IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
+      InverseSolverInterface(pinocchioInterface, modelInfo, solverInfo){}
 
-  Eigen::VectorXd DifferentialSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
-                               const Eigen::VectorXd& error)
+  bool IterationalSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
+    const Eigen::VectorXd& error,
+    Eigen::VectorXd& jointDeltas)
   {
-    Eigen::VectorXd jointDeltas;
     Eigen::MatrixXd gradient = getGradient(actualJointPositions);
-    switch(taskType_)
+    switch(getTaskType())
     {
       case TaskType::NORMAL:
         {
@@ -31,7 +34,7 @@ namespace lrt_inverse_kinematics
         }
         break;
     }
-    return jointDeltas;
+    return true;
   }
 
 };

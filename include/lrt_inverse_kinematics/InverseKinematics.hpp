@@ -65,6 +65,10 @@ namespace lrt_inverse_kinematics
 
     const std::string& getSolverName();
 
+    TaskType getTaskType();
+
+
+
     private:
 
     Eigen::VectorXd getErrorPositions(const Eigen::VectorXd& actualJointPositions, 

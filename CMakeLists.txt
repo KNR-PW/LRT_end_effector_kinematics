@@ -27,9 +27,10 @@ endforeach()
 include_directories(include)
 
 add_executable(EndEffectorKinematics
-  src/solvers/differential_solvers/DifferentialSolver.cpp
+  src/solvers/InverseSolverInterface.cpp
+  src/solvers/iterational_solvers/IterationalSolver.cpp
   src/InverseKinematics.cpp
-  # src/main.cpp
+  src/main.cpp
 )
 
 ament_target_dependencies(EndEffectorKinematics ${THIS_PACKAGE_DEPENDS})

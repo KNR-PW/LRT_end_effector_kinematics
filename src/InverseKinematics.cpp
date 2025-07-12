@@ -41,7 +41,6 @@ namespace lrt_inverse_kinematics
         if (std::find(linksToRemove.begin(), linksToRemove.end(), parent_name) != linksToRemove.end()) 
         {
           jointsToRemove.push_back(jointPair.second->name);
-          std::cout << jointPair.second->name << std::endl;
         }
       }
 
@@ -317,6 +316,11 @@ namespace lrt_inverse_kinematics
   const std::string& InverseKinematics::getSolverName()
   {
     return solverImplementation_->getSolverName();
+  }
+
+  TaskType InverseKinematics::getTaskType()
+  {
+    return solverImplementation_->getTaskType();
   }
 
 }
