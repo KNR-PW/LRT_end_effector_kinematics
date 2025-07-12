@@ -241,15 +241,13 @@ namespace lrt_inverse_kinematics
     for(size_t i = 0; i < modelInfo_.numThreeDofEndEffectors_; ++i)
     {
       const size_t frameIndex = modelInfo_.endEffectorFrameIndices_[i];
-      const Eigen::Vector3d acutalPosition = data.oMf[modelInfo_.baseFrameIndex_].rotation() * data.oMf[frameIndex].translation();
-      error << endEffectorPositions[i] - acutalPosition;
+      error << endEffectorPositions[i] - data.oMf[frameIndex].translation();
     }
 
     for(size_t i = modelInfo_.numThreeDofEndEffectors_; i < modelInfo_.numEndEffectors_; ++i)
     {
       const size_t frameIndex = modelInfo_.endEffectorFrameIndices_[i];
-      const pinocchio::SE3 actualTransform = data.oMf[modelInfo_.baseFrameIndex_].actInv(data.oMf[frameIndex]);
-      const pinocchio::SE3 errorTransform = actualTransform.actInv(endEffectorTransforms[i - modelInfo_.numThreeDofEndEffectors_]);
+      const pinocchio::SE3 errorTransform = data.oMf[frameIndex].actInv(endEffectorTransforms[i - modelInfo_.numThreeDofEndEffectors_]);
       error << pinocchio::log6(errorTransform).toVector();
     }
 
