@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <memory>
+#include <cmath>
 
 #include <Eigen/Dense>
 
@@ -29,12 +30,15 @@ namespace lrt_inverse_kinematics
     SMALL_STEP_SIZE = 5,
   };
 
-  class InverseKinematicsSolver
+  class InverseKinematics
   {
 
     public:
 
-    InverseKinematicsSolver(IKModelInfo modelInfo,
+    InverseKinematics(const std::string urdfFilePath,
+      const std::string baseLinkName,
+      const std::vector<std::string>& threeDofEndEffectorNames,
+      const std::vector<std::string>& sixDofEndEffectorNames,
       IKSolverInfo solverInfo,
       std::string solverName);
 
@@ -51,6 +55,8 @@ namespace lrt_inverse_kinematics
     
     bool checkPositionBounds(const Eigen::VectorXd& newJointPositions);
 
+    bool checkVelocityBounds(const Eigen::VectorXd& jointDeltas);
+
     const IKModelInfo& getModelInfo();
 
     const IKSolverInfo& getSolverInfo();
@@ -66,6 +72,7 @@ namespace lrt_inverse_kinematics
       const std::vector<pinocchio::SE3>& endEffectorTransforms);
 
     
+    std::unique_ptr<ocs2::PinocchioInterface> pinocchioInterface_;
 
     IKModelInfo modelInfo_;
     IKSolverInfo solverInfo_;
