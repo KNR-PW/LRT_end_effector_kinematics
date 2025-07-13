@@ -9,7 +9,8 @@ namespace lrt_inverse_kinematics
     const std::vector<std::string>& threeDofEndEffectorNames,
     const std::vector<std::string>& sixDofEndEffectorNames,
     IKSolverInfo solverInfo,
-    std::string solverName): solverInfo_(solverInfo)
+    const std::string solverName)
+      :solverInfo_(solverInfo)
   {
     using joint_pair_t = std::pair<const std::string, std::shared_ptr<::urdf::Joint>>;
 
@@ -117,6 +118,8 @@ namespace lrt_inverse_kinematics
       modelInfo_.endEffectorFrameIndices_.push_back(sixDofEndEffectorFrameIndex);
       modelInfo_.endEffectorJointIndices_.push_back(sixDofEndEffectorJointIndex);
     }
+
+    solverImplementation_ = getSolver(solverName);
   }
 
   std::pair<bool, ReturnFlag> InverseKinematics::calculateJointDeltas(const Eigen::VectorXd& actualJointPositions, 
@@ -320,6 +323,21 @@ namespace lrt_inverse_kinematics
   TaskType InverseKinematics::getTaskType()
   {
     return solverImplementation_->getTaskType();
+  }
+
+  std::unique_ptr<InverseSolverInterface> InverseKinematics::getSolver(
+    const std::string& solverName)
+  {
+    std::unique_ptr<InverseSolverInterface> solverPtr;
+    if(solverName == "NewtonRaphson")
+    {
+      solverPtr.reset(new NewtonRaphsonSolver(*pinocchioInterface_, modelInfo_, solverInfo_));
+    }
+    else
+    {
+      throw std::invalid_argument("InverseKinematics: Wrong solver name!");
+    }
+    return solverPtr;
   }
 
 }

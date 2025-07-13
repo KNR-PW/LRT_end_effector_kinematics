@@ -12,7 +12,7 @@ namespace lrt_inverse_kinematics
     public:
     
     GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
-      IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
+      const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
 
     bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const Eigen::VectorXd& error,

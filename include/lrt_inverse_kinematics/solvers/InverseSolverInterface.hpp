@@ -20,7 +20,7 @@ namespace lrt_inverse_kinematics
     public:
 
     InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
-      IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
+      const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
 
     virtual bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const Eigen::VectorXd& error,

@@ -4,11 +4,11 @@
 namespace lrt_inverse_kinematics
 {
   InverseSolverInterface::InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
-    IKModelInfo& modelInfo, const IKSolverInfo& solverInfo):
+    const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo):
     pinocchioInterface_(&pinocchioInterface), modelInfo_(&modelInfo), solverInfo_(&solverInfo)
   {
     const auto& model = pinocchioInterface.getModel();
-
+    
     const size_t outputDim = 3 * modelInfo.numThreeDofEndEffectors_ + 6 * modelInfo.numSixDofEndEffectors_;
     const size_t jointDofDim = model.nv;
 

@@ -3,7 +3,7 @@
 namespace lrt_inverse_kinematics
 {
   NewtonRaphsonSolver::NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
-    IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
+    const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
       GradientBasedSolver(pinocchioInterface, modelInfo, solverInfo)
   {
     solverName_ = "NewtonRaphson";
