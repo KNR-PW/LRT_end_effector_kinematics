@@ -11,9 +11,12 @@ namespace lrt_inverse_kinematics
 
   bool GradientBasedSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
     const Eigen::VectorXd& error,
+    const std::vector<Eigen::Vector3d>& endEffectorPositions,
+    const std::vector<pinocchio::SE3>& endEffectorTransforms,
     Eigen::VectorXd& jointDeltas)
   {
-    Eigen::MatrixXd gradient = getGradient(actualJointPositions);
+    Eigen::MatrixXd gradient = getGradient(actualJointPositions,
+      endEffectorPositions, endEffectorTransforms);
     switch(getTaskType())
     {
       case TaskType::NORMAL:

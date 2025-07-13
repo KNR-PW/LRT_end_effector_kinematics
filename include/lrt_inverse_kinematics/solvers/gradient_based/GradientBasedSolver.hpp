@@ -16,9 +16,13 @@ namespace lrt_inverse_kinematics
 
     bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const Eigen::VectorXd& error,
+      const std::vector<Eigen::Vector3d>& endEffectorPositions,
+      const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& jointDeltas) override final;
 
-    virtual Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions) = 0;
+    virtual Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
+      const std::vector<Eigen::Vector3d>& endEffectorPositions,
+      const std::vector<pinocchio::SE3>& endEffectorTransforms) = 0;
 
     SolverType getSolverType() override final;
 

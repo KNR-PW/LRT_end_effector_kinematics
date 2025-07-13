@@ -24,6 +24,8 @@ namespace lrt_inverse_kinematics
 
     virtual bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const Eigen::VectorXd& error,
+      const std::vector<Eigen::Vector3d>& endEffectorPositions,
+      const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& jointDeltas) = 0;
 
     virtual SolverType getSolverType() = 0;

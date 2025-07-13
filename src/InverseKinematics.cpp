@@ -144,7 +144,8 @@ namespace lrt_inverse_kinematics
       return returnValue; // early return
     }
         
-    if(!solverImplementation_->getJointDeltas(actualJointPositions, error, jointDeltas))
+    if(!solverImplementation_->getJointDeltas(actualJointPositions, error, endEffectorPositions,
+      endEffectorTransforms, jointDeltas))
     {
       returnValue.first = false;
       returnValue.second = ReturnFlag::SOLVER_ERROR;
@@ -203,7 +204,8 @@ namespace lrt_inverse_kinematics
 
       Eigen::VectorXd jointDeltas;
 
-      if(!solverImplementation_->getJointDeltas(newJointPositions, error, jointDeltas))
+      if(!solverImplementation_->getJointDeltas(actualJointPositions, error, endEffectorPositions,
+      endEffectorTransforms, jointDeltas))
       {
         returnValue.first = false;
         returnValue.second = ReturnFlag::SOLVER_ERROR;
