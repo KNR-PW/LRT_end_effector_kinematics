@@ -6,12 +6,12 @@
 namespace lrt_inverse_kinematics
 {
 
-  class IterationalSolver: public InverseSolverInterface
+  class GradientBasedSolver: public InverseSolverInterface
   {
 
     public:
     
-    IterationalSolver(ocs2::PinocchioInterface& pinocchioInterface,
+    GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
       IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
 
     bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
@@ -22,7 +22,7 @@ namespace lrt_inverse_kinematics
 
     SolverType getSolverType() override final;
 
-    virtual ~IterationalSolver() = default;
+    virtual ~GradientBasedSolver() = default;
 
   };
 

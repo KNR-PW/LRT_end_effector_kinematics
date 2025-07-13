@@ -1,10 +1,10 @@
-#include <lrt_inverse_kinematics/solvers/iterational/NewtonRaphsonSolver.hpp>
+#include <lrt_inverse_kinematics/solvers/gradient_based/NewtonRaphsonSolver.hpp>
 
 namespace lrt_inverse_kinematics
 {
   NewtonRaphsonSolver::NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
     IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
-      IterationalSolver(pinocchioInterface, modelInfo, solverInfo)
+      GradientBasedSolver(pinocchioInterface, modelInfo, solverInfo)
   {
     solverName_ = "NewtonRaphson";
   }

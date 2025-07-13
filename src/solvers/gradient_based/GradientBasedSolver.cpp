@@ -1,15 +1,15 @@
-#include <lrt_inverse_kinematics/solvers/iterational/IterationalSolver.hpp>
+#include <lrt_inverse_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
 
 namespace lrt_inverse_kinematics
 {
-  IterationalSolver::IterationalSolver(ocs2::PinocchioInterface& pinocchioInterface,
+  GradientBasedSolver::GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
     IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
       InverseSolverInterface(pinocchioInterface, modelInfo, solverInfo)
   {
-    solverType_ = SolverType::ITERATIONAL;
+    solverType_ = SolverType::GRADIENT_BASED;
   }
 
-  bool IterationalSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
+  bool GradientBasedSolver::getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
     const Eigen::VectorXd& error,
     Eigen::VectorXd& jointDeltas)
   {
@@ -40,7 +40,7 @@ namespace lrt_inverse_kinematics
     return true;
   }
 
-  SolverType IterationalSolver::getSolverType()
+  SolverType GradientBasedSolver::getSolverType()
   {
     return solverType_;
   }

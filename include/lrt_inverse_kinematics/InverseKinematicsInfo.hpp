@@ -51,8 +51,8 @@ namespace lrt_inverse_kinematics
 
   enum class SolverType: uint8_t
   {
-    ITERATIONAL = 0,
-    OPTIMIZATION = 1,
+    GRADIENT_BASED = 0,
+    QP_BASED = 1,
   };
 
   enum class TaskType: uint8_t

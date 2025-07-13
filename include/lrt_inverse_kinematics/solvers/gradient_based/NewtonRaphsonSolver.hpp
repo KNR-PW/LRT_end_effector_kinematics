@@ -1,5 +1,5 @@
 #include <lrt_inverse_kinematics/solvers/InverseSolverInterface.hpp>
-#include <lrt_inverse_kinematics/solvers/iterational/IterationalSolver.hpp>
+#include <lrt_inverse_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
 
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
@@ -7,7 +7,7 @@
 namespace lrt_inverse_kinematics
 {
 
-  class NewtonRaphsonSolver: public IterationalSolver
+  class NewtonRaphsonSolver: public GradientBasedSolver
   {
     public:
 
