@@ -14,19 +14,6 @@
 
 namespace lrt_inverse_kinematics
 {
-  enum class SolverType: uint8_t
-  {
-    ITERATIONAL = 0,
-    OPTIMIZATION = 1,
-  };
-
-  enum class TaskType: uint8_t
-  {
-    NORMAL = 0,
-    REDUNDANT = 1,
-    DAMPED = 2,
-  };
-
   class InverseSolverInterface
   {
 

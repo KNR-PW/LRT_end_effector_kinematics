@@ -37,6 +37,30 @@ namespace lrt_inverse_kinematics
     std::vector<size_t> endEffectorFrameIndices_;  // indices of end-effector frames [3DOF end effectors, 6DOF end effectors]
     std::vector<size_t> endEffectorJointIndices_;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
   };
+
+  enum class ReturnFlag: uint8_t
+  {
+    FINISHED = 0, // true
+    IN_PROGRESS = 1,
+
+    SOLVER_ERROR = 2, //  false
+    POSITION_OUT_OF_BOUNDS = 3,
+    VELOCITY_OUT_OF_BOUNDS = 4,
+    SMALL_STEP_SIZE = 5,
+  };
+
+  enum class SolverType: uint8_t
+  {
+    ITERATIONAL = 0,
+    OPTIMIZATION = 1,
+  };
+
+  enum class TaskType: uint8_t
+  {
+    NORMAL = 0,
+    REDUNDANT = 1,
+    DAMPED = 2,
+  };
   
 }; // namespace lrt_inverse_kinematics
 

@@ -18,18 +18,6 @@
 
 namespace lrt_inverse_kinematics
 {
-
-  enum class ReturnFlag: uint8_t
-  {
-    FINISHED = 0, // true
-    IN_PROGRESS = 1,
-
-    SOLVER_ERROR = 2, //  false
-    POSITION_OUT_OF_BOUNDS = 3,
-    VELOCITY_OUT_OF_BOUNDS = 4,
-    SMALL_STEP_SIZE = 5,
-  };
-
   class InverseKinematics
   {
 
