@@ -215,7 +215,8 @@ namespace lrt_inverse_kinematics
         return returnValue; // early return
       }
 
-      newJointPositions += solverInfo_.stepCoefficient_ * jointDeltas;
+      jointDeltas = solverInfo_.stepCoefficient_ * jointDeltas;
+      pinocchio::integrate(model, newJointPositions, jointDeltas);
 
       if(jointDeltas.norm() < solverInfo_.minimumStepSize_ && error.norm() > solverInfo_.tolerance_)
       {
@@ -231,6 +232,7 @@ namespace lrt_inverse_kinematics
         return returnValue; // early return
       }
 
+      iteration++;
     }
     return returnValue;
   }

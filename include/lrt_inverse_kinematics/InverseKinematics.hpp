@@ -11,6 +11,7 @@
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/joint-configuration.hpp>
 
 #include <lrt_inverse_kinematics/InverseKinematicsInfo.hpp>
 #include <lrt_inverse_kinematics/solvers/InverseSolverInterface.hpp>
