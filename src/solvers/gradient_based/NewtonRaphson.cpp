@@ -26,14 +26,17 @@ namespace lrt_inverse_kinematics
     {
       const size_t frameIndex = modelInfo_->endEffectorFrameIndices_[i];
       const size_t rowStartIndex = 3 * i;
-      gradient.middleRows<3>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
+      gradient.middleRows<3>(rowStartIndex) = -pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
     }
 
     for(size_t i = modelInfo_->numThreeDofEndEffectors_; i < modelInfo_->numEndEffectors_; ++i)
     {
       const size_t frameIndex = modelInfo_->endEffectorFrameIndices_[i];
+      const pinocchio::SE3 errorTransformInv = endEffectorTransforms[i - modelInfo_->numThreeDofEndEffectors_].actInv(data.oMf[frameIndex]);
+      pinocchio::Data::Matrix6 Jlog;
+      pinocchio::Jlog6(errorTransformInv, Jlog);
       const size_t rowStartIndex = 6 * i - 3 * modelInfo_->numThreeDofEndEffectors_;
-      gradient.middleRows<6>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
+      gradient.middleRows<6>(rowStartIndex) = -Jlog * pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
     }
 
     return gradient;

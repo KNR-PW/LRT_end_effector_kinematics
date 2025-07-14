@@ -3,6 +3,7 @@
 
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/spatial/explog.hpp>
 
 namespace lrt_inverse_kinematics
 {
