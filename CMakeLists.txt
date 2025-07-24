@@ -30,6 +30,7 @@ add_executable(EndEffectorKinematics
   src/solvers/InverseSolverInterface.cpp
   src/solvers/gradient_based/GradientBasedSolver.cpp
   src/solvers/gradient_based/NewtonRaphson.cpp
+  # src/solvers/gradient_based/NewtonRaphsonAD.cpp
   src/InverseKinematics.cpp
   src/main.cpp
 )
@@ -57,6 +58,22 @@ install(TARGETS
 install(
   DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME}
+)
+
+install(
+  FILES test/models/r6bot/r6bot.urdf.xacro
+  DESTINATION share/${PROJECT_NAME}/models/r6bot
+)
+
+
+install(
+  DIRECTORY test/models/r6bot/meshes test/models/r6bot/rviz test/models/r6bot/urdf test/models/r6bot/srdf
+  DESTINATION share/${PROJECT_NAME}/models/r6bot
+)
+
+install(
+  DIRECTORY test/models/r6bot/launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()
