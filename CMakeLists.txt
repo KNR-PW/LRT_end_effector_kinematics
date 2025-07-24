@@ -6,6 +6,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
+
+# Resolve for the package path at compile time.
+configure_file (
+  "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/path_management/package_path.h.in"
+  "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/path_management/package_path.h" @ONLY
+)
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 
