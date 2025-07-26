@@ -139,7 +139,7 @@ namespace lrt_inverse_kinematics
 
     pinocchio::framesForwardKinematics(model, data, actualJointPositions);
 
-    Eigen::VectorXd error = getErrorPositions(actualJointPositions, endEffectorPositions, endEffectorTransforms);
+    Eigen::VectorXd error = getErrorPositions(endEffectorPositions, endEffectorTransforms);
     
     if(error.norm() < solverInfo_.tolerance_)
     {
@@ -192,13 +192,12 @@ namespace lrt_inverse_kinematics
     size_t iteration = 0;
 
     newJointPositions = actualJointPositions;
+    
 
     while(iteration < solverInfo_.maxIterations_)
     {
       pinocchio::framesForwardKinematics(model, data, newJointPositions);
-
-      const Eigen::VectorXd error = getErrorPositions(actualJointPositions, endEffectorPositions, endEffectorTransforms);
-
+      const Eigen::VectorXd error = getErrorPositions(endEffectorPositions, endEffectorTransforms);
       if(error.norm() < solverInfo_.tolerance_)
       {
         returnValue.second = ReturnFlag::FINISHED;
@@ -207,7 +206,7 @@ namespace lrt_inverse_kinematics
 
       Eigen::VectorXd jointDeltas;
 
-      if(!solverImplementation_->getJointDeltas(actualJointPositions, error, endEffectorPositions,
+      if(!solverImplementation_->getJointDeltas(newJointPositions, error, endEffectorPositions,
       endEffectorTransforms, jointDeltas))
       {
         returnValue.first = false;
@@ -216,7 +215,7 @@ namespace lrt_inverse_kinematics
       }
 
       jointDeltas = solverInfo_.stepCoefficient_ * jointDeltas;
-      pinocchio::integrate(model, newJointPositions, jointDeltas);
+      newJointPositions = pinocchio::integrate(model, newJointPositions, jointDeltas);
 
       if(jointDeltas.norm() < solverInfo_.minimumStepSize_ && error.norm() > solverInfo_.tolerance_)
       {
@@ -231,18 +230,18 @@ namespace lrt_inverse_kinematics
         returnValue.second = ReturnFlag::POSITION_OUT_OF_BOUNDS;
         return returnValue; // early return
       }
-
+      
       iteration++;
     }
     return returnValue;
   }
 
-  Eigen::VectorXd InverseKinematics::getErrorPositions(const Eigen::VectorXd& actualJointPositions, 
-    const std::vector<Eigen::Vector3d>& endEffectorPositions,
+  Eigen::VectorXd InverseKinematics::getErrorPositions(const std::vector<Eigen::Vector3d>& endEffectorPositions,
     const std::vector<pinocchio::SE3>& endEffectorTransforms)
   {
     const auto& data = pinocchioInterface_->getData();
-    Eigen::VectorXd error;
+    size_t errorSize = 3 * modelInfo_.numThreeDofEndEffectors_ + 6 * modelInfo_.numSixDofEndEffectors_;
+    Eigen::VectorXd error(errorSize);
 
     for(size_t i = 0; i < modelInfo_.numThreeDofEndEffectors_; ++i)
     {

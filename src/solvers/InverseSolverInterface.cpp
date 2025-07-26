@@ -13,12 +13,13 @@ namespace lrt_inverse_kinematics
     const size_t jointDofDim = model.nv;
 
     if(solverInfo.dampingCoefficient_ > 0.0) taskType_ = TaskType::DAMPED;
-    if(jointDofDim > outputDim) taskType_ = TaskType::REDUNDANT;
-    if(jointDofDim == outputDim) taskType_ = TaskType::NORMAL;
-    if(jointDofDim < outputDim)
+    else if(jointDofDim > outputDim) taskType_ = TaskType::REDUNDANT;
+    else if(jointDofDim == outputDim) taskType_ = TaskType::NORMAL;
+    else if(jointDofDim < outputDim)
     {
       throw std::logic_error("InverseSolverInterface: Task is overconstrained, not supported!");
     }
+    
   }
 
   TaskType InverseSolverInterface::getTaskType()
