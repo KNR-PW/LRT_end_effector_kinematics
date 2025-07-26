@@ -60,16 +60,17 @@ namespace lrt_inverse_kinematics
 
 
 
+    protected:
+
+    std::unique_ptr<ocs2::PinocchioInterface> pinocchioInterface_;
+    
     private:
 
-    Eigen::VectorXd getErrorPositions(const Eigen::VectorXd& actualJointPositions, 
-      const std::vector<Eigen::Vector3d>& endEffectorPositions,
+    Eigen::VectorXd getErrorPositions(const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms);
 
     std::unique_ptr<InverseSolverInterface> getSolver(const std::string& solverName);
 
-    
-    std::unique_ptr<ocs2::PinocchioInterface> pinocchioInterface_;
 
     IKModelInfo modelInfo_;
     IKSolverInfo solverInfo_;

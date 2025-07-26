@@ -1,3 +1,6 @@
+#ifndef __LRT_GRADIENT_BASED_SOLVER__
+#define __LRT_GRADIENT_BASED_SOLVER__
+
 
 #include <Eigen/Dense>
 
@@ -31,3 +34,5 @@ namespace lrt_inverse_kinematics
   };
 
 };
+
+#endif

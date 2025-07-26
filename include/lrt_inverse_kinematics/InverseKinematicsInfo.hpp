@@ -38,7 +38,7 @@ namespace lrt_inverse_kinematics
     std::vector<size_t> endEffectorJointIndices_;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
   };
 
-  enum class ReturnFlag: uint8_t
+  enum class ReturnFlag
   {
     FINISHED = 0, // true
     IN_PROGRESS = 1,
@@ -49,18 +49,20 @@ namespace lrt_inverse_kinematics
     SMALL_STEP_SIZE = 5,
   };
 
-  enum class SolverType: uint8_t
+  enum class SolverType
   {
     GRADIENT_BASED = 0,
     QP_BASED = 1,
   };
 
-  enum class TaskType: uint8_t
+  enum class TaskType
   {
     NORMAL = 0,
     REDUNDANT = 1,
     DAMPED = 2,
   };
+
+  std::string returnFlagToString(ReturnFlag flag);
   
 }; // namespace lrt_inverse_kinematics
 

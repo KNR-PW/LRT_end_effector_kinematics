@@ -34,6 +34,7 @@ endforeach()
 include_directories(include)
 
 add_executable(EndEffectorKinematics
+  src/InverseKinematicsInfo.cpp
   src/solvers/InverseSolverInterface.cpp
   src/solvers/gradient_based/GradientBasedSolver.cpp
   src/solvers/gradient_based/NewtonRaphson.cpp
@@ -44,15 +45,23 @@ add_executable(EndEffectorKinematics
 
 ament_target_dependencies(EndEffectorKinematics ${THIS_PACKAGE_DEPENDS})
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
+  # find_package(ament_cmake_gtest REQUIRED)
+
+  # ament_add_gtest(${PROJECT_NAME}_test
+  #           test/NewtonRaphsonTests.cpp
+            
+  # )
+  # ament_target_dependencies(${PROJECT_NAME}_test ${THIS_PACKAGE_DEPENDS})
+  # # target_include_directories(${PROJECT_NAME}_test PRIVATE test/include)
+  # target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  # target_compile_options(${PROJECT_NAME}_test PUBLIC ${FLAGS})
+  # # the following line skips the linter which checks for copyrights
+  # # comment the line when a copyright and license is added to all source files
+  # set(ament_cmake_copyright_FOUND TRUE)
+  # # the following line skips cpplint (only works in a git repo)
+  # # comment the line when this package is in a git repo and when
+  # # a copyright and license is added to all source files
+  # set(ament_cmake_cpplint_FOUND TRUE)
 endif()
 
 install(TARGETS
@@ -68,7 +77,7 @@ install(
 )
 
 install(
-  FILES test/models/r6bot/r6bot.urdf.xacro
+  FILES test/models/r6bot/r6bot.urdf.xacro test/models/r6bot/r6bot.urdf
   DESTINATION share/${PROJECT_NAME}/models/r6bot
 )
 

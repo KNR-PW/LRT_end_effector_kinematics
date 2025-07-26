@@ -1,3 +1,7 @@
+#ifndef __LRT_NEWTON_RAPHSON_SOLVER__
+#define __LRT_NEWTON_RAPHSON_SOLVER__
+
+
 #include <lrt_inverse_kinematics/solvers/InverseSolverInterface.hpp>
 #include <lrt_inverse_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
 
@@ -24,3 +28,5 @@ namespace lrt_inverse_kinematics
   };
 
 };
+
+#endif
