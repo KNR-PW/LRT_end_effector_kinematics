@@ -3,8 +3,8 @@
 namespace lrt_inverse_kinematics
 {
   NewtonRaphsonSolver::NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
-    const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
-      GradientBasedSolver(pinocchioInterface, modelInfo, solverInfo)
+    const IKModelInternalInfo& modelInternalInfo, const IKSolverInfo& solverInfo): 
+      GradientBasedSolver(pinocchioInterface, modelInternalInfo, solverInfo)
   {
     solverName_ = "NewtonRaphson";
   }
@@ -18,24 +18,24 @@ namespace lrt_inverse_kinematics
 
     pinocchio::computeJointJacobians(model, data, actualJointPositions);
 
-    const size_t rowSize = 3 * modelInfo_->numThreeDofEndEffectors_ + 6 * modelInfo_->numSixDofEndEffectors_;
+    const size_t rowSize = 3 * modelInternalInfo_->numThreeDofEndEffectors_ + 6 * modelInternalInfo_->numSixDofEndEffectors_;
 
     Eigen::MatrixXd gradient(rowSize, model.nq);
 
-    for(size_t i = 0; i < modelInfo_->numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalInfo_->numThreeDofEndEffectors_; ++i)
     {
-      const size_t frameIndex = modelInfo_->endEffectorFrameIndices_[i];
+      const size_t frameIndex = modelInternalInfo_->endEffectorFrameIndices_[i];
       const size_t rowStartIndex = 3 * i;
       gradient.middleRows<3>(rowStartIndex) = -pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
     }
 
-    for(size_t i = modelInfo_->numThreeDofEndEffectors_; i < modelInfo_->numEndEffectors_; ++i)
+    for(size_t i = modelInternalInfo_->numThreeDofEndEffectors_; i < modelInternalInfo_->numEndEffectors_; ++i)
     {
-      const size_t frameIndex = modelInfo_->endEffectorFrameIndices_[i];
-      const pinocchio::SE3 errorTransformInv = endEffectorTransforms[i - modelInfo_->numThreeDofEndEffectors_].actInv(data.oMf[frameIndex]);
+      const size_t frameIndex = modelInternalInfo_->endEffectorFrameIndices_[i];
+      const pinocchio::SE3 errorTransformInv = endEffectorTransforms[i - modelInternalInfo_->numThreeDofEndEffectors_].actInv(data.oMf[frameIndex]);
       pinocchio::Data::Matrix6 Jlog;
       pinocchio::Jlog6(errorTransformInv, Jlog);
-      const size_t rowStartIndex = 6 * i - 3 * modelInfo_->numThreeDofEndEffectors_;
+      const size_t rowStartIndex = 6 * i - 3 * modelInternalInfo_->numThreeDofEndEffectors_;
       gradient.middleRows<6>(rowStartIndex) = -Jlog * pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
     }
 

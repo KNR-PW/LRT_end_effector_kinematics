@@ -20,7 +20,7 @@ namespace lrt_inverse_kinematics
     public:
 
     InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
-      const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
+      const IKModelInternalInfo& modelInternalInfo, const IKSolverInfo& solverInfo);
 
     virtual bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const Eigen::VectorXd& error,
@@ -39,7 +39,7 @@ namespace lrt_inverse_kinematics
     protected:
     
     ocs2::PinocchioInterface* pinocchioInterface_;
-    const IKModelInfo* modelInfo_;
+    const IKModelInternalInfo* modelInternalInfo_;
     const IKSolverInfo* solverInfo_;
     
     std::string solverName_;

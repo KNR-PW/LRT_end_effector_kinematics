@@ -30,6 +30,13 @@ namespace lrt_inverse_kinematics
 
   struct IKModelInfo
   {
+    std::string baseLinkName_;
+    std::vector<std::string> threeDofEndEffectorNames_;
+    std::vector<std::string> sixDofEndEffectorNames_;
+  };
+
+  struct IKModelInternalInfo
+  {
     size_t baseFrameIndex_;                        // base frame index (frame that forward and inverse kinematics are defined)
     size_t numEndEffectors_;                       // Number of all end effectors
     size_t numThreeDofEndEffectors_;               // 3DOF end effectors, position only
@@ -37,6 +44,7 @@ namespace lrt_inverse_kinematics
     std::vector<size_t> endEffectorFrameIndices_;  // indices of end-effector frames [3DOF end effectors, 6DOF end effectors]
     std::vector<size_t> endEffectorJointIndices_;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
   };
+
 
   enum class ReturnFlag
   {
@@ -62,7 +70,19 @@ namespace lrt_inverse_kinematics
     DAMPED = 2,
   };
 
+  struct ReturnStruct
+  {
+    bool success_;
+    ReturnFlag flag_;
+
+    std::string toString();
+  };
+
   std::string returnFlagToString(ReturnFlag flag);
+
+  std::string solverTypeToString(SolverType solverType);
+
+  std::string taskTypeToString(TaskType taskType);
   
 }; // namespace lrt_inverse_kinematics
 

@@ -18,7 +18,7 @@ namespace lrt_inverse_kinematics
     public:
 
     NewtonRaphsonSolverAD(ocs2::PinocchioInterface& pinocchioInterface,
-      const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo);
+      const IKModelInternalInfo& modelInternalInfo, const IKSolverInfo& solverInfo);
 
     Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
       const std::vector<Eigen::Vector3d>& endEffectorPositions,

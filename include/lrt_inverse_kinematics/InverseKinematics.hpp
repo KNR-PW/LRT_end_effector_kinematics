@@ -27,18 +27,16 @@ namespace lrt_inverse_kinematics
     public:
 
     InverseKinematics(const std::string urdfFilePath,
-      const std::string baseLinkName,
-      const std::vector<std::string>& threeDofEndEffectorNames,
-      const std::vector<std::string>& sixDofEndEffectorNames,
-      IKSolverInfo solverInfo,
+      const IKModelInfo modelInfo,
+      const IKSolverInfo solverInfo,
       const std::string solverName);
 
-    std::pair<bool, ReturnFlag> calculateJointDeltas(const Eigen::VectorXd& actualJointPositions, 
+    ReturnStruct calculateJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& jointDeltas);
 
-    std::pair<bool, ReturnFlag> calculateJointPositions(const Eigen::VectorXd& actualJointPositions, 
+    ReturnStruct calculateJointPositions(const Eigen::VectorXd& actualJointPositions, 
       const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& newJointPositions);
@@ -49,6 +47,8 @@ namespace lrt_inverse_kinematics
     bool checkVelocityBounds(const Eigen::VectorXd& jointDeltas);
 
     const IKModelInfo& getModelInfo();
+
+    const IKModelInternalInfo& getModelInternalInfo();
 
     const IKSolverInfo& getSolverInfo();
 
@@ -69,10 +69,11 @@ namespace lrt_inverse_kinematics
     Eigen::VectorXd getErrorPositions(const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms);
 
-    std::unique_ptr<InverseSolverInterface> getSolver(const std::string& solverName);
+    std::unique_ptr<InverseSolverInterface> makeSolver(const std::string& solverName);
 
 
     IKModelInfo modelInfo_;
+    IKModelInternalInfo modelInternalInfo_;
     IKSolverInfo solverInfo_;
     std::unique_ptr<InverseSolverInterface> solverImplementation_;
   };

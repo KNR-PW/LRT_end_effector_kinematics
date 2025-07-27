@@ -12,13 +12,10 @@ namespace lrt_inverse_kinematics
     public:
 
     InverseKinematicsTest(const std::string urdfFilePath,
-      const std::string baseLinkName,
-      const std::vector<std::string>& threeDofEndEffectorNames,
-      const std::vector<std::string>& sixDofEndEffectorNames,
+      const IKModelInfo modelInfo,
       IKSolverInfo solverInfo,
       const std::string solverName):
-      InverseKinematics(urdfFilePath, baseLinkName, threeDofEndEffectorNames, 
-                        sixDofEndEffectorNames, solverInfo, solverName){};
+      InverseKinematics(urdfFilePath, modelInfo, solverInfo, solverName){};
     
     ocs2::PinocchioInterface* getPinocchioInterface()
     {

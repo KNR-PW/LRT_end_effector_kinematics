@@ -3,8 +3,8 @@
 namespace lrt_inverse_kinematics
 {
   GradientBasedSolver::GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
-    const IKModelInfo& modelInfo, const IKSolverInfo& solverInfo): 
-      InverseSolverInterface(pinocchioInterface, modelInfo, solverInfo)
+    const IKModelInternalInfo& modelInternalInfo, const IKSolverInfo& solverInfo): 
+      InverseSolverInterface(pinocchioInterface, modelInternalInfo, solverInfo)
   {
     solverType_ = SolverType::GRADIENT_BASED;
   }
