@@ -1,6 +1,7 @@
 #ifndef __LRT_GRADIENT_BASED_SOLVER__
 #define __LRT_GRADIENT_BASED_SOLVER__
 
+#include <functional>
 
 #include <Eigen/Dense>
 
@@ -30,6 +31,11 @@ namespace lrt_inverse_kinematics
     SolverType getSolverType() override final;
 
     virtual ~GradientBasedSolver() = default;
+
+    private:
+
+    std::function<void(const Eigen::MatrixXd&,
+      const Eigen::VectorXd&, Eigen::VectorXd&)> jointDeltasFunction_;
 
   };
 
