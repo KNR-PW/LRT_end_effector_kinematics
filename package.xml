@@ -7,14 +7,9 @@
   <maintainer email="bartlomiejk@vp.pl">bartek</maintainer>
   <license>GPL-3.0-only</license>
 
-  <depend>eigen3_cmake_module</depend>
+  <!-- <depend>eigen3_cmake_module</depend>
   <depend>eigen</depend>
-  <depend>pinocchio</depend>
-  <depend>rclcpp</depend>
-  <depend>geometry_msgs</depend>
-  <depend>trajectory_msgs</depend>
-  <depend>control_msgs</depend>
-
+  <depend>pinocchio</depend> -->
   <depend>ocs2_pinocchio_interface</depend>
   <depend>ocs2_robotic_tools</depend>
 

@@ -75,7 +75,7 @@ namespace lrt_inverse_kinematics
     bool success_;
     ReturnFlag flag_;
 
-    std::string toString();
+    std::string toString() const;
   };
 
   std::string returnFlagToString(ReturnFlag flag);

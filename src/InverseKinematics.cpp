@@ -234,6 +234,34 @@ namespace lrt_inverse_kinematics
     return returnValue;
   }
 
+  Eigen::MatrixXd InverseKinematics::getJacobian(const Eigen::VectorXd& actualJointPositions)
+  {
+    const auto& model = pinocchioInterface_->getModel();
+    auto& data = pinocchioInterface_->getData();
+
+    pinocchio::computeJointJacobians(model, data, actualJointPositions);
+
+    const size_t rowSize = 3 * modelInternalInfo_.numThreeDofEndEffectors_ + 6 * modelInternalInfo_.numSixDofEndEffectors_;
+
+    Eigen::MatrixXd jacobian(rowSize, model.nq);
+
+    for(size_t i = 0; i < modelInternalInfo_.numThreeDofEndEffectors_; ++i)
+    {
+      const size_t frameIndex = modelInternalInfo_.endEffectorFrameIndices_[i];
+      const size_t rowStartIndex = 3 * i;
+      jacobian.middleRows<3>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
+    }
+
+    for(size_t i = modelInternalInfo_.numThreeDofEndEffectors_; i < modelInternalInfo_.numEndEffectors_; ++i)
+    {
+      const size_t frameIndex = modelInternalInfo_.endEffectorFrameIndices_[i];
+      const size_t rowStartIndex = 6 * i - 3 * modelInternalInfo_.numThreeDofEndEffectors_;
+      jacobian.middleRows<6>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
+    }
+
+    return jacobian;
+  }
+
   Eigen::VectorXd InverseKinematics::getErrorPositions(const std::vector<Eigen::Vector3d>& endEffectorPositions,
     const std::vector<pinocchio::SE3>& endEffectorTransforms)
   {

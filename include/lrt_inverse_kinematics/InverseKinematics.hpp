@@ -41,6 +41,8 @@ namespace lrt_inverse_kinematics
       const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& newJointPositions);
 
+    Eigen::MatrixXd getJacobian(const Eigen::VectorXd& actualJointPositions);
+
     
     bool checkPositionBounds(const Eigen::VectorXd& newJointPositions);
 

@@ -61,7 +61,7 @@ namespace lrt_inverse_kinematics
     return returnString;
   }
 
-  std::string ReturnStruct::toString()
+  std::string ReturnStruct::toString() const
   {
     std::string returnString = "Success: ";
     if(success_) returnString += "True\t";
