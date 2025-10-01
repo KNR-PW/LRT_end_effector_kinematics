@@ -1,12 +1,12 @@
-#include <lrt_inverse_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
+#include <multi_end_effector_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
 
-namespace lrt_inverse_kinematics
+namespace multi_end_effector_kinematics
 {
   GradientBasedSolver::GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
-    const IKModelInternalInfo& modelInternalInfo, const IKSolverInfo& solverInfo): 
-      InverseSolverInterface(pinocchioInterface, modelInternalInfo, solverInfo)
+    const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings): 
+      InverseSolverInterface(pinocchioInterface, modelInternalInfo, solverSettings)
   {
-    solverType_ = SolverType::GRADIENT_BASED;
+    solverType_ = InverseSolverType::GRADIENT_BASED;
     switch(getTaskType())
     {
       case TaskType::NORMAL:
@@ -37,7 +37,7 @@ namespace lrt_inverse_kinematics
           { 
             Eigen::MatrixXd ggT;
             ggT.noalias() = gradient * gradient.transpose();
-            ggT.diagonal().array() += solverInfo_->dampingCoefficient_;
+            ggT.diagonal().array() += solverSettings_->dampingCoefficient_;
             jointDeltas.noalias() = -gradient.transpose() * ggT.ldlt().solve(error);
           };
         }
@@ -59,7 +59,7 @@ namespace lrt_inverse_kinematics
     return true;
   }
 
-  SolverType GradientBasedSolver::getSolverType()
+  InverseSolverType GradientBasedSolver::getSolverType()
   {
     return solverType_;
   }

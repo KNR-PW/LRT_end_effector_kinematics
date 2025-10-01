@@ -1,17 +1,19 @@
-#include <lrt_inverse_kinematics/InverseKinematicsInfo.hpp>
-#include <lrt_inverse_kinematics/InverseKinematics.hpp>
-#include <lrt_inverse_kinematics/InverseKinematicsTest.hpp>
-#include <lrt_inverse_kinematics/path_management/package_path.h>
+#include <multi_end_effector_kinematics/Settings.hpp>
+#include <multi_end_effector_kinematics/InverseKinematics.hpp>
+#include <multi_end_effector_kinematics/InverseKinematicsTest.hpp>
+#include <multi_end_effector_kinematics/path_management/package_path.h>
 #include <pinocchio/parsers/urdf.hpp>
 
 #include <pinocchio/algorithm/frames-derivatives.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 
+#include <chrono>
+
 int main(int argc, char** argv)
 {
-  // std::string urdfPathName = lrt_inverse_kinematics::package_path::getPath();
-  // urdfPathName += "/../install/lrt_inverse_kinematics/share/lrt_inverse_kinematics/models/r6bot/r6bot.urdf";
+  // std::string urdfPathName = multi_end_effector_kinematics::package_path::getPath();
+  // urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
   // std::string baseLinkName = "trunk_link";
   // std::string rightForwardFeet = "RFF_link";
   // std::string leftForwardFeet = "LFF_link";
@@ -20,13 +22,13 @@ int main(int argc, char** argv)
   // std::vector<std::string> threeDofLinks{rightForwardFeet, rightRearFeet, leftForwardFeet, leftRearFeet};
   // std::vector<std::string> sixDofLinks;
   // std::string solverName = "NewtonRaphson";
-  // lrt_inverse_kinematics::IKSolverInfo solverInfo;
-  // lrt_inverse_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
-  // baseLinkName, threeDofLinks, sixDofLinks, solverInfo, solverName);
+  // multi_end_effector_kinematics::InverseSolverSettings solverSettings;
+  // multi_end_effector_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
+  // baseLinkName, threeDofLinks, sixDofLinks, solverSettings, solverName);
 
   // ocs2::PinocchioInterface* pinocchioInterface = inverseKinematicsTest.getPinocchioInterface();
-  // lrt_inverse_kinematics::IKModelInfo modelInfo = inverseKinematicsTest.getModelInfo();
-  // lrt_inverse_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelInfo, solverInfo);
+  // multi_end_effector_kinematics::KinematicsModelSettings modelSettings = inverseKinematicsTest.getModelInfo();
+  // multi_end_effector_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelSettings, solverSettings);
 
   // const pinocchio::Model& modelInverse = pinocchioInterface->getModel();
   // pinocchio::Data& dataInverse = pinocchioInterface->getData();
@@ -63,39 +65,146 @@ int main(int argc, char** argv)
 
   // std::cout << (jacobianOne - jacobianTwo).norm() << std::endl;
 
-  std::string urdfPathName = lrt_inverse_kinematics::package_path::getPath();
-  urdfPathName += "/../install/lrt_inverse_kinematics/share/lrt_inverse_kinematics/models/r6bot/r6bot.urdf";
+
+
+
+
+
+  // std::string urdfPathName = multi_end_effector_kinematics::package_path::getPath();
+  // urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  
+  // std::string baseLinkName = "base_link";
+  // std::string solverName = "NewtonRaphson";
+  // std::vector<std::string> threeDofLinks{};
+  // std::vector<std::string> sixDofLinks{"tool0"};
+  // multi_end_effector_kinematics::InverseSolverSettings solverSettings;
+  // solverSettings.dampingCoefficient_ = 1e-3;
+  // solverSettings.stepCoefficient_ = 0.005;
+  // solverSettings.maxIterations_ = 1000;
+  // solverSettings.tolerance_ = 1e-4;
+
+  // multi_end_effector_kinematics::KinematicsModelSettings modelSettings;
+  // modelSettings.baseLinkName_ = baseLinkName;
+  // modelSettings.threeDofEndEffectorNames_ = threeDofLinks;
+  // modelSettings.sixDofEndEffectorNames_ = sixDofLinks;
+
+  // multi_end_effector_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
+  //   modelSettings, solverSettings, solverName);
+
+  // ocs2::PinocchioInterface* pinocchioInterface = inverseKinematicsTest.getPinocchioInterface();
+  // multi_end_effector_kinematics::KinematicsInternalModelSettings modelInternalInfo = inverseKinematicsTest.getModelInternalInfo();
+  // multi_end_effector_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelInternalInfo, solverSettings);
+
+  // pinocchio::Model modelTrue;
+  // pinocchio::urdf::buildModel(urdfPathName, modelTrue, true);
+
+  // pinocchio::Data dataTrue(modelTrue);
+
+  // Eigen::VectorXd qTrue = pinocchio::neutral(modelTrue);
+  // Eigen::VectorXd qInv = qTrue;
+  // Eigen::VectorXd qInvNew = qTrue;
+  
+  // Eigen::Vector3d rpy = Eigen::Vector3d::Random() * M_PI_2 / 2;
+  // Eigen::Vector3d position = Eigen::Vector3d::Random() * 0.25;
+  // Eigen::Quaterniond quaterion = Eigen::AngleAxisd(rpy(0), Eigen::Vector3d::UnitZ())
+  // * Eigen::AngleAxisd(rpy(1), Eigen::Vector3d::UnitY())
+  // * Eigen::AngleAxisd(rpy(2), Eigen::Vector3d::UnitX());
+  // pinocchio::SE3 sixDofPostion = pinocchio::SE3(quaterion, position);
+
+  // pinocchio::SE3 sixDofPostionTest(Eigen::Matrix3d::Identity(), Eigen::Vector3d(-0.15, 1.0, 0.7));
+
+  // std::vector<pinocchio::SE3> sixDofPositions;
+  // std::vector<Eigen::Vector3d> threeDofPositions;
+  // sixDofPositions.push_back(sixDofPostionTest);
+
+  // const double eps = 1e-4;
+  // const int IT_MAX = 1000;
+  // const double DT = 0.005;
+  // const double damp = 1e-3;
+
+  // size_t frameIndex = modelTrue.getFrameId("tool0");
+
+  // inverseKinematicsTest.calculateJointPositions(qInv, threeDofPositions, sixDofPositions, qInvNew);
+
+  // std::cout << "Convergence achieved!" << std::endl;
+  // std::cout << qInvNew.transpose() << std::endl;
+ 
+  // pinocchio::Data::Matrix6x J(6, modelTrue.nv);
+  // J.setZero();
+ 
+  // bool success = false;
+  // typedef Eigen::Matrix<double, 6, 1> Vector6d;
+  // Vector6d err;
+  // Eigen::VectorXd v(modelTrue.nv);
+  // for (int i = 0;; i++)
+  // {
+  //   pinocchio::forwardKinematics(modelTrue, dataTrue, qTrue);
+  //   pinocchio::updateFramePlacements(modelTrue, dataTrue);
+  //   const pinocchio::SE3 iMd = dataTrue.oMf[frameIndex].actInv(sixDofPostionTest);
+  //   err = pinocchio::log6(iMd).toVector(); // in joint frame
+  //   if (err.norm() < eps)
+  //   {
+  //     success = true;
+  //     break;
+  //   }
+  //   if (i >= IT_MAX)
+  //   {
+  //     success = false;
+  //     break;
+  //   }
+  //   pinocchio::computeFrameJacobian(modelTrue, dataTrue, qTrue, frameIndex, J); // J in joint frame
+  //   pinocchio::Data::Matrix6 Jlog;
+  //   pinocchio::Jlog6(iMd.inverse(), Jlog);
+  //   J = -Jlog * J;
+  //   pinocchio::Data::Matrix6 JJt;
+  //   JJt.noalias() = J * J.transpose();
+  //   JJt.diagonal().array() += damp;
+  //   v.noalias() = -J.transpose() * JJt.ldlt().solve(err);
+  //   qTrue = pinocchio::integrate(modelTrue, qTrue, v * DT);
+  // }
+
+  // if (success)
+  // {
+  //   std::cout << "Convergence achieved true!" << std::endl;
+  //   std::cout << qTrue.transpose() << std::endl;
+  // }
+  // else
+  // {
+  //   std::cout
+  //     << "\nWarning: the iterative algorithm has not reached convergence to the desired precision"
+  //     << std::endl;
+  //     std::cout << qTrue.transpose() << std::endl;
+  //     std::cout << err.norm() << std::endl;
+  // }
+
+
+
+  std::string urdfPathName = multi_end_effector_kinematics::package_path::getPath();
+  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "base_link";
   std::string solverName = "NewtonRaphson";
   std::vector<std::string> threeDofLinks{};
   std::vector<std::string> sixDofLinks{"tool0"};
-  lrt_inverse_kinematics::IKSolverInfo solverInfo;
-  solverInfo.dampingCoefficient_ = 1e-3;
-  solverInfo.stepCoefficient_ = 0.005;
-  solverInfo.maxIterations_ = 1000;
-  solverInfo.tolerance_ = 1e-4;
+  multi_end_effector_kinematics::InverseSolverSettings solverSettings;
+  solverSettings.dampingCoefficient_ = 1e-3;
+  solverSettings.stepCoefficient_ = 0.005;
+  solverSettings.maxIterations_ = 1000;
+  solverSettings.tolerance_ = 1e-4;
 
-  lrt_inverse_kinematics::IKModelInfo modelInfo;
-  modelInfo.baseLinkName_ = baseLinkName;
-  modelInfo.threeDofEndEffectorNames_ = threeDofLinks;
-  modelInfo.sixDofEndEffectorNames_ = sixDofLinks;
+  multi_end_effector_kinematics::KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName_ = baseLinkName;
+  modelSettings.threeDofEndEffectorNames_ = threeDofLinks;
+  modelSettings.sixDofEndEffectorNames_ = sixDofLinks;
 
-  lrt_inverse_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
-    modelInfo, solverInfo, solverName);
+  multi_end_effector_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
+    modelSettings, solverSettings, solverName);
 
   ocs2::PinocchioInterface* pinocchioInterface = inverseKinematicsTest.getPinocchioInterface();
-  lrt_inverse_kinematics::IKModelInternalInfo modelInternalInfo = inverseKinematicsTest.getModelInternalInfo();
-  lrt_inverse_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelInternalInfo, solverInfo);
-
-  pinocchio::Model modelTrue;
-  pinocchio::urdf::buildModel(urdfPathName, modelTrue, true);
-
-  pinocchio::Data dataTrue(modelTrue);
-
-  Eigen::VectorXd qTrue = pinocchio::neutral(modelTrue);
-  Eigen::VectorXd qInv = qTrue;
-  Eigen::VectorXd qInvNew = qTrue;
+  const auto& model = pinocchioInterface->getModel();
+  auto& data = pinocchioInterface->getData();
+  multi_end_effector_kinematics::KinematicsInternalModelSettings modelInternalInfo = inverseKinematicsTest.getModelInternalInfo();
+  multi_end_effector_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelInternalInfo, solverSettings);
   
   Eigen::Vector3d rpy = Eigen::Vector3d::Random() * M_PI_2 / 2;
   Eigen::Vector3d position = Eigen::Vector3d::Random() * 0.25;
@@ -110,63 +219,58 @@ int main(int argc, char** argv)
   std::vector<Eigen::Vector3d> threeDofPositions;
   sixDofPositions.push_back(sixDofPostionTest);
 
-  const double eps = 1e-4;
-  const int IT_MAX = 1000;
-  const double DT = 0.005;
-  const double damp = 1e-3;
+  size_t frameIndex = model.getFrameId("tool0");
 
-  size_t frameIndex = modelTrue.getFrameId("tool0");
+  const int ITER_ITER = 1'000;
 
-  inverseKinematicsTest.calculateJointPositions(qInv, threeDofPositions, sixDofPositions, qInvNew);
+  std::vector<int> times;
 
-  std::cout << "Convergence achieved!" << std::endl;
-  std::cout << qInvNew.transpose() << std::endl;
- 
-  pinocchio::Data::Matrix6x J(6, modelTrue.nv);
-  J.setZero();
- 
-  bool success = false;
-  typedef Eigen::Matrix<double, 6, 1> Vector6d;
-  Vector6d err;
-  Eigen::VectorXd v(modelTrue.nv);
-  for (int i = 0;; i++)
+  for(int j = 0; j < ITER_ITER; ++j)
   {
-    pinocchio::forwardKinematics(modelTrue, dataTrue, qTrue);
-    pinocchio::updateFramePlacements(modelTrue, dataTrue);
-    const pinocchio::SE3 iMd = dataTrue.oMf[frameIndex].actInv(sixDofPostionTest);
-    err = pinocchio::log6(iMd).toVector(); // in joint frame
-    if (err.norm() < eps)
+    Eigen::VectorXd q = pinocchio::neutral(model);
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+    const int ITER = 1'000;
+
+    Eigen::VectorXd jointDeltas(model.nv);
+
+    for(int i = 0; i < ITER; ++i)
     {
-      success = true;
-      break;
+      pinocchio::forwardKinematics(model, data, q);
+      pinocchio::updateFramePlacements(model, data);
+      const pinocchio::SE3 iMd = data.oMf[frameIndex].actInv(sixDofPostionTest);
+      Eigen::Matrix<double, 6, 1> err = pinocchio::log6(iMd).toVector(); // in joint frame
+      solver.getJointDeltas(q, err, threeDofPositions, sixDofPositions, jointDeltas);
+
+      q += jointDeltas;
     }
-    if (i >= IT_MAX)
-    {
-      success = false;
-      break;
-    }
-    pinocchio::computeFrameJacobian(modelTrue, dataTrue, qTrue, frameIndex, J); // J in joint frame
-    pinocchio::Data::Matrix6 Jlog;
-    pinocchio::Jlog6(iMd.inverse(), Jlog);
-    J = -Jlog * J;
-    pinocchio::Data::Matrix6 JJt;
-    JJt.noalias() = J * J.transpose();
-    JJt.diagonal().array() += damp;
-    v.noalias() = -J.transpose() * JJt.ldlt().solve(err);
-    qTrue = pinocchio::integrate(modelTrue, qTrue, v * DT);
+
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+    times.push_back(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count());
+
   }
 
-  if (success)
+  int mean = 0;
+
+  for(int i = 0; i < ITER_ITER; ++i)
   {
-    std::cout << "Convergence achieved true!" << std::endl;
-    std::cout << qTrue.transpose() << std::endl;
+    mean += times[i];
   }
-  else
+
+  mean = mean / ITER_ITER;
+
+  int sd = 0;
+
+  for(int i = 0; i < ITER_ITER; ++i)
   {
-    std::cout
-      << "\nWarning: the iterative algorithm has not reached convergence to the desired precision"
-      << std::endl;
-      std::cout << qTrue.transpose() << std::endl;
-      std::cout << err.norm() << std::endl;
+    sd += (times[i] - mean) * (times[i] - mean);
   }
+
+  sd = std::sqrt(sd / ITER_ITER);
+
+  std::cout << "Time: " << mean << " +- " << sd << "[us]" << std::endl;
+
+
+  return 0;
 }

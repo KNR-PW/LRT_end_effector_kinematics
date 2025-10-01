@@ -1,7 +1,7 @@
-#include <lrt_inverse_kinematics/InverseKinematics.hpp>
+#include <multi_end_effector_kinematics/InverseKinematics.hpp>
 
 
-namespace lrt_inverse_kinematics
+namespace multi_end_effector_kinematics
 {
 
   class InverseKinematicsTest: public InverseKinematics
@@ -10,10 +10,10 @@ namespace lrt_inverse_kinematics
       const std::string baseLinkName,
       const std::vector<std::string>& threeDofEndEffectorNames,
       const std::vector<std::string>& sixDofEndEffectorNames,
-      IKSolverInfo solverInfo,
+      InverseSolverSettings solverSettings,
       const std::string solverName):
       InverseKinematics(urdfFilePath, baseLinkName, threeDofEndEffectorNames, 
-                        sixDofEndEffectorNames, solverInfo, solverName){};
+                        sixDofEndEffectorNames, solverSettings, solverName){};
     
     ocs2::PinocchioInterface& getPinocchioInterface()
     {
@@ -21,4 +21,4 @@ namespace lrt_inverse_kinematics
     }
   };
 
-}; // lrt_inverse_kinematics
+}; // multi_end_effector_kinematics

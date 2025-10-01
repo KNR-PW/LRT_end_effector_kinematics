@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="r6bot">
 
   <!-- Import r6bot macro -->
-  <xacro:include filename="$(find lrt_inverse_kinematics)/models/r6bot/urdf/r6bot_description.urdf.xacro"/>
+  <xacro:include filename="$(find multi_end_effector_kinematics)/models/r6bot/urdf/r6bot_description.urdf.xacro"/>
 
   <!-- create link fixed to the "world" -->
   <link name="world"/>

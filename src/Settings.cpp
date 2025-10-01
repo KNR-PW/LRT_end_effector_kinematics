@@ -1,42 +1,51 @@
-#include <lrt_inverse_kinematics/InverseKinematicsInfo.hpp>
+#include <multi_end_effector_kinematics/Settings.hpp>
 
-namespace lrt_inverse_kinematics
+namespace multi_end_effector_kinematics
 {
-  std::string returnFlagToString(ReturnFlag flag)
+  std::string returnFlagToString(TaskReturnFlag flag)
   {
     std::string returnString;
     switch(flag)
     {
-      case ReturnFlag::FINISHED:
+      case TaskReturnFlag::FINISHED:
         returnString = "FINISHED";
         break;
-      case ReturnFlag::IN_PROGRESS:
+      case TaskReturnFlag::IN_PROGRESS:
         returnString = "IN_PROGRESS";
         break;
-      case ReturnFlag::SOLVER_ERROR:
+      case TaskReturnFlag::SOLVER_ERROR:
         returnString = "SOLVER_ERROR";
         break;
-      case ReturnFlag::POSITION_OUT_OF_BOUNDS:
-        returnString = "POSITION_OUT_OF_BOUNDS";
+      case TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS:
+        returnString = "CURRENT_POSITION_OUT_OF_BOUNDS";
         break;
-      case ReturnFlag::VELOCITY_OUT_OF_BOUNDS:
-        returnString = "VELOCITY_OUT_OF_BOUNDS";
+      case TaskReturnFlag::CURRENT_VELOCITY_OUT_OF_BOUNDS:
+        returnString = "CURRENT_VELOCITY_OUT_OF_BOUNDS";
         break;
-      case ReturnFlag::SMALL_STEP_SIZE:
+      case TaskReturnFlag::NEW_POSITION_OUT_OF_BOUNDS:
+        returnString = "NEW_POSITION_OUT_OF_BOUNDS";
+        break;
+      case TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS:
+        returnString = "NEW_VELOCITY_OUT_OF_BOUNDS";
+        break;
+      case TaskReturnFlag::SMALL_STEP_SIZE:
         returnString = "SMALL_STEP_SIZE";
+        break;
+      case TaskReturnFlag::SINGULARITY:
+        returnString = "SINGULARITY";
         break;
     }
     return returnString;
   }
-  std::string solverTypeToString(SolverType solverType)
+  std::string solverTypeToString(InverseSolverType solverType)
   {
     std::string returnString;
     switch(solverType)
     {
-      case SolverType::GRADIENT_BASED:
+      case InverseSolverType::GRADIENT_BASED:
         returnString = "GRADIENT_BASED";
         break;
-      case SolverType::QP_BASED:
+      case InverseSolverType::QP_BASED:
         returnString = "QP_BASED";
         break;
     }
@@ -61,7 +70,7 @@ namespace lrt_inverse_kinematics
     return returnString;
   }
 
-  std::string ReturnStruct::toString() const
+  std::string ReturnStatus::toString() const
   {
     std::string returnString = "Success: ";
     if(success_) returnString += "True\t";

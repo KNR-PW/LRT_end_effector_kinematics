@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstddef>
 #include <string>
 
-namespace lrt_inverse_kinematics
+namespace multi_end_effector_kinematics
 {
   namespace package_path
   {
@@ -44,4 +44,4 @@ namespace lrt_inverse_kinematics
       return "@PROJECT_SOURCE_DIR@";
     }
   } // namespace package_path
-}  // namespace lrt_inverse_kinematics
+}  // namespace multi_end_effector_kinematics

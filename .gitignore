@@ -1,3 +1,3 @@
 .vscode/
 build/
-include/lrt_inverse_kinematics/path_management/package_path.h
+include/multi_end_effector_kinematics/path_management/package_path.h

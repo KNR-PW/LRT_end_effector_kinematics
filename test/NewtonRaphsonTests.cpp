@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
-#include <lrt_inverse_kinematics/solvers/gradient_based/NewtonRaphsonSolver.hpp>
-#include <lrt_inverse_kinematics/InverseKinematicsTest.hpp>
-#include <lrt_inverse_kinematics/path_management/package_path.h>
+#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonSolver.hpp>
+#include <multi_end_effector_kinematics/InverseKinematicsTest.hpp>
+#include <multi_end_effector_kinematics/path_management/package_path.h>
 
 #include <pinocchio/parsers/urdf.hpp>
 
 #include <Eigen/Geometry>
 
-using namespace lrt_inverse_kinematics;
+using namespace multi_end_effector_kinematics;
 
 
 static constexpr ocs2::scalar_t tolerance = 1e-6;
@@ -16,7 +16,7 @@ static constexpr size_t numTests = 100;
 TEST(NewtonRaphsonTest, threeDofGradient)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/lrt_inverse_kinematics/share/lrt_inverse_kinematics/models/r6bot/meldog_no_base_link.urdf";
+  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -26,13 +26,13 @@ TEST(NewtonRaphsonTest, threeDofGradient)
   std::vector<std::string> threeDofLinks{rightForwardFeet, rightRearFeet, leftForwardFeet, leftRearFeet};
   std::vector<std::string> sixDofLinks;
   std::string solverName = "NewtonRaphson";
-  IKSolverInfo solverInfo;
+  InverseSolverSettings solverSettings;
   InverseKinematicsTest inverseKinematicsTest(urdfPathName,
-    baseLinkName, threeDofLinks, sixDofLinks, solverInfo, solverName);
+    baseLinkName, threeDofLinks, sixDofLinks, solverSettings, solverName);
 
   ocs2::PinocchioInterface* pinocchioInterface = inverseKinematicsTest.getPinocchioInterface();
-  IKModelInfo modelInfo = inverseKinematicsTest.getModelInfo();
-  lrt_inverse_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelInfo, solverInfo);
+  KinematicsModelSettings modelSettings = inverseKinematicsTest.getModelInfo();
+  multi_end_effector_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelSettings, solverSettings);
 
   const pinocchio::Model& modelInverse = pinocchioInterface->getModel();
   pinocchio::Data& dataInverse = pinocchioInterface->getData();
@@ -84,19 +84,19 @@ TEST(NewtonRaphsonTest, threeDofGradient)
 TEST(NewtonRaphsonTest, SixDofGradient)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/lrt_inverse_kinematics/share/lrt_inverse_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "base_link";
   std::string solverName = "NewtonRaphson";
   std::vector<std::string> threeDofLinks{};
   std::vector<std::string> sixDofLinks{"tool0"};
-  IKSolverInfo solverInfo;
+  InverseSolverSettings solverSettings;
   InverseKinematicsTest inverseKinematicsTest(urdfPathName,
-    baseLinkName, threeDofLinks, sixDofLinks, solverInfo, solverName);
+    baseLinkName, threeDofLinks, sixDofLinks, solverSettings, solverName);
 
   ocs2::PinocchioInterface* pinocchioInterface = inverseKinematicsTest.getPinocchioInterface();
-  IKModelInfo modelInfo = inverseKinematicsTest.getModelInfo();
-  lrt_inverse_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelInfo, solverInfo);
+  KinematicsModelSettings modelSettings = inverseKinematicsTest.getModelInfo();
+  multi_end_effector_kinematics::NewtonRaphsonSolver solver(*pinocchioInterface, modelSettings, solverSettings);
 
   const pinocchio::Model& modelInverse = pinocchioInterface->getModel();
   pinocchio::Data& dataInverse = pinocchioInterface->getData();

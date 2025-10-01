@@ -41,7 +41,7 @@ def generate_launch_description():
             " ",
             PathJoinSubstitution(
                 [
-                    FindPackageShare("lrt_inverse_kinematics"),
+                    FindPackageShare("multi_end_effector_kinematics"),
                     "models",
                     "r6bot",
                     "r6bot.urdf.xacro",
@@ -52,7 +52,7 @@ def generate_launch_description():
     robot_description = {"robot_description": robot_description_content}
 
     rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare("lrt_inverse_kinematics"),
+        [FindPackageShare("multi_end_effector_kinematics"),
          "models",
          "r6bot",
          "rviz",

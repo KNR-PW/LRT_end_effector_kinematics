@@ -1,18 +1,18 @@
-#include <lrt_inverse_kinematics/solvers/InverseSolverInterface.hpp>
+#include <multi_end_effector_kinematics/solvers/InverseSolverInterface.hpp>
 
 
-namespace lrt_inverse_kinematics
+namespace multi_end_effector_kinematics
 {
   InverseSolverInterface::InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
-    const IKModelInternalInfo& modelInternalInfo, const IKSolverInfo& solverInfo):
-    pinocchioInterface_(&pinocchioInterface), modelInternalInfo_(&modelInternalInfo), solverInfo_(&solverInfo)
+    const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings):
+    pinocchioInterface_(&pinocchioInterface), modelInternalSettings_(&modelInternalInfo), solverSettings_(&solverSettings)
   {
     const auto& model = pinocchioInterface.getModel();
     
     const size_t outputDim = 3 * modelInternalInfo.numThreeDofEndEffectors_ + 6 * modelInternalInfo.numSixDofEndEffectors_;
     const size_t jointDofDim = model.nv;
 
-    if(solverInfo.dampingCoefficient_ > 0.0) taskType_ = TaskType::DAMPED;
+    if(solverSettings.dampingCoefficient_ > 0.0) taskType_ = TaskType::DAMPED;
     else if(jointDofDim > outputDim) taskType_ = TaskType::REDUNDANT;
     else if(jointDofDim == outputDim) taskType_ = TaskType::NORMAL;
     else if(jointDofDim < outputDim)

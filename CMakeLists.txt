@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(lrt_inverse_kinematics)
+project(multi_end_effector_kinematics)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -39,12 +39,12 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_DEPENDS})
 endforeach()
 
 add_library(${PROJECT_NAME}
-  src/InverseKinematicsInfo.cpp
+  src/Settings.cpp
   src/solvers/InverseSolverInterface.cpp
   src/solvers/gradient_based/GradientBasedSolver.cpp
   src/solvers/gradient_based/NewtonRaphson.cpp
   # src/solvers/gradient_based/NewtonRaphsonAD.cpp
-  src/InverseKinematics.cpp
+  src/MultiEndEffectorKinematics.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -71,7 +71,7 @@ if (cmake_clang_tools_FOUND)
 endif (cmake_clang_tools_FOUND)
 
 # add_executable(EndEffectorKinematics
-#   src/InverseKinematicsInfo.cpp
+#   src/Settings.cpp
 #   src/solvers/InverseSolverInterface.cpp
 #   src/solvers/gradient_based/GradientBasedSolver.cpp
 #   src/solvers/gradient_based/NewtonRaphson.cpp

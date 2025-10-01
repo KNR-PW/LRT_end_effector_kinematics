@@ -4,13 +4,13 @@
   <xacro:macro name="r6bot_description">
 
   <!-- helper macro -->
-  <xacro:include filename="$(find lrt_inverse_kinematics)/models/r6bot/urdf/inc/create_link.xacro"/>
+  <xacro:include filename="$(find multi_end_effector_kinematics)/models/r6bot/urdf/inc/create_link.xacro"/>
 
   <xacro:create_link
       link_name="base_link"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_0"
   />
 
@@ -18,7 +18,7 @@
       link_name="link_1"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_1"
   />
 
@@ -26,7 +26,7 @@
       link_name="link_2"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_2"
   />
 
@@ -34,7 +34,7 @@
       link_name="link_3"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_3"
   />
 
@@ -42,7 +42,7 @@
       link_name="link_4"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_4"
   />
 
@@ -50,7 +50,7 @@
       link_name="link_5"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_5"
   />
 
@@ -58,7 +58,7 @@
       link_name="link_6"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
-      mesh_package="lrt_inverse_kinematics/models/r6bot"
+      mesh_package="multi_end_effector_kinematics/models/r6bot"
       mesh_name="link_6"
   />
 
