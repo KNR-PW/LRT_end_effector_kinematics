@@ -30,22 +30,19 @@
 
 namespace multi_end_effector_kinematics
 {
-
   class NewtonRaphsonSolver: public GradientBasedSolver
   {
     public:
 
-    NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
-      const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
-
-    Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
-      const std::vector<Eigen::Vector3d>& endEffectorPositions,
-      const std::vector<pinocchio::SE3>& endEffectorTransforms) override final;
-
-    const std::string& getSolverName() override final;
-
+      NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
+        const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
+      
+      Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
+        const std::vector<Eigen::Vector3d>& endEffectorPositions,
+        const std::vector<pinocchio::SE3>& endEffectorTransforms) override final;
+      
+      const std::string& getSolverName() override final;
   };
-
 };
 
 #endif

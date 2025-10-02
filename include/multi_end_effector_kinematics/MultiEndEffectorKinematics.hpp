@@ -42,7 +42,6 @@ namespace multi_end_effector_kinematics
 {
   class MultiEndEffectorKinematics
   {
-
     public:
 
       /**
@@ -395,7 +394,6 @@ namespace multi_end_effector_kinematics
       InverseSolverSettings solverSettings_;
       std::unique_ptr<InverseSolverInterface> solverImplementation_;
   };
-
 }; // multi_end_effector_kinematics
 
 

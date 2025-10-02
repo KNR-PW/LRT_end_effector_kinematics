@@ -33,30 +33,28 @@
 
 namespace multi_end_effector_kinematics
 {
-
   class NewtonRaphsonSolverAD: public GradientBasedSolver
   {
     public:
 
-    NewtonRaphsonSolverAD(ocs2::PinocchioInterface& pinocchioInterface,
-      const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
+      NewtonRaphsonSolverAD(ocs2::PinocchioInterface& pinocchioInterface,
+        const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
 
-    Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
-      const std::vector<Eigen::Vector3d>& endEffectorPositions,
-      const std::vector<pinocchio::SE3>& endEffectorTransforms) override final;
+      Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
+        const std::vector<Eigen::Vector3d>& endEffectorPositions,
+        const std::vector<pinocchio::SE3>& endEffectorTransforms) override final;
 
-    const std::string& getSolverName() override final;
+      const std::string& getSolverName() override final;
 
     private:
 
-    ocs2::ad_vector_t getErrorPositionsCppAd(
-      ocs2::PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
-      const ocs2::ad_vector_t& actualJointPositions,
-      const ocs2::ad_vector_t& jointVelocityDeltas,
-      const ocs2::ad_vector_t& logEndEffectorTransforms);
+      ocs2::ad_vector_t getErrorPositionsCppAd(
+        ocs2::PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
+        const ocs2::ad_vector_t& actualJointPositions,
+        const ocs2::ad_vector_t& jointVelocityDeltas,
+        const ocs2::ad_vector_t& logEndEffectorTransforms);
 
-    std::unique_ptr<ocs2::CppAdInterface> errorPositionsAdFunction_;
-
+      std::unique_ptr<ocs2::CppAdInterface> errorPositionsAdFunction_;
   };
-
 };
+#endif

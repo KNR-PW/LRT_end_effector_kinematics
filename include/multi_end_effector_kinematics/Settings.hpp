@@ -26,32 +26,58 @@
 
 namespace multi_end_effector_kinematics
 {
-
   struct InverseSolverSettings
   {
+    // Max iterations for solving inverse kinematics
     unsigned maxIterations_ = 100;
+
+    // Task error tolerance
     double tolerance_ = 1e-6;
+
+    // Minimum step size between iteration
     double minimumStepSize_ = 1e-6;
+
+    // Damping coefficient for damped inverse jacobian matrix: J^T * (J * J^T + λ * I)^-1
     double dampingCoefficient_ = 1e-4; 
+
+    // Coefficient multiplied with new Δq
     double stepCoefficient_ = 0.5; // > 0
   };
 
   struct KinematicsModelSettings
   {
+    // Base link (frame that forward and inverse kinematics are defined)
     std::string baseLinkName_;
+
+    // Vector of all end effectors with 3 DoF
     std::vector<std::string> threeDofEndEffectorNames_;
+
+    // Vector of all end effectors with 6 DoF
     std::vector<std::string> sixDofEndEffectorNames_;
+
+    // Threshold for checking if robot is in singularity
     double singularityThreshold = 1.0;
   };
 
   struct KinematicsInternalModelSettings
   {
-    size_t baseFrameIndex_;                        // base frame index (frame that forward and inverse kinematics are defined)
-    size_t numEndEffectors_;                       // Number of all end effectors
-    size_t numThreeDofEndEffectors_;               // 3DOF end effectors, position only
-    size_t numSixDofEndEffectors_;                 // 6DOF end effectors, position and orientation
-    std::vector<size_t> endEffectorFrameIndices_;  // indices of end-effector frames [3DOF end effectors, 6DOF end effectors]
-    std::vector<size_t> endEffectorJointIndices_;  // indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
+    // Base frame index (frame that forward and inverse kinematics are defined)
+    size_t baseFrameIndex_;
+    
+    // Number of all end effectors
+    size_t numEndEffectors_;
+
+    // 3 DoF end effectors, position only                  
+    size_t numThreeDofEndEffectors_;
+    
+    // 6 DoF end effectors, position and orientation
+    size_t numSixDofEndEffectors_;
+
+    // Indices of end-effector frames [3DOF end effectors, 6DOF end effectors]   
+    std::vector<size_t> endEffectorFrameIndices_;
+
+    // Indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
+    std::vector<size_t> endEffectorJointIndices_;
   };
 
 
@@ -88,12 +114,11 @@ namespace multi_end_effector_kinematics
     TaskReturnFlag flag_;
 
     std::string toString() const;
-  };
+  };  
 
+  // Helper functions
   std::string returnFlagToString(TaskReturnFlag flag);
-
   std::string solverTypeToString(InverseSolverType solverType);
-
   std::string taskTypeToString(TaskType taskType);
   
 }; // namespace multi_end_effector_kinematics

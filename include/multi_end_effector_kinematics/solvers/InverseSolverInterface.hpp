@@ -37,40 +37,58 @@ namespace multi_end_effector_kinematics
 {
   class InverseSolverInterface
   {
-
     public:
 
-    InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
-      const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
+      /**
+       * Constructor
+       * Crate interface for inverse kinematics solver
+       * @warning Everything in input and output is defined in base frame of reference!
+       *
+       * @param [in] pinocchioInterface: OCS2 pinocchio interface (created by MultiEndEffectorKinematics)
+       * @param [in] modelInternalInfo: Internal kinematic model
+       * @param [in] solverSettings: Settings for inverse kinematics solver
+       */
+      InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
+        const KinematicsInternalModelSettings& modelInternalInfo, 
+        const InverseSolverSettings& solverSettings);
+      
+      /**
+       * Get one iteration of inverse kinematics algorithm (Δq) of q[n+1] = q[n] + Δq
+       *
+       * @param [in] actualJointPositions: Current joint positions
+       * @param [in] error: Difference between target and current end effector positions and transforms
+       * @param [in] endEffectorPositions: Positions of 3D end effectors
+       * @param [in] endEffectorTransforms: Transforms of 6D end effectors
+       * @param [out] jointDeltas: joint deltas Δq
+       * 
+       * @return Return status of task
+       */
+      virtual bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
+        const Eigen::VectorXd& error,
+        const std::vector<Eigen::Vector3d>& endEffectorPositions,
+        const std::vector<pinocchio::SE3>& endEffectorTransforms,
+        Eigen::VectorXd& jointDeltas) = 0;
 
-    virtual bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
-      const Eigen::VectorXd& error,
-      const std::vector<Eigen::Vector3d>& endEffectorPositions,
-      const std::vector<pinocchio::SE3>& endEffectorTransforms,
-      Eigen::VectorXd& jointDeltas) = 0;
+      virtual InverseSolverType getSolverType() = 0;
 
-    virtual InverseSolverType getSolverType() = 0;
+      virtual const std::string& getSolverName() = 0;
 
-    virtual const std::string& getSolverName() = 0;
-
-    TaskType getTaskType();
-    
-    virtual ~InverseSolverInterface() = default;
+      TaskType getTaskType();
+      
+      virtual ~InverseSolverInterface() = default;
 
     protected:
-    
-    ocs2::PinocchioInterface* pinocchioInterface_;
-    const KinematicsInternalModelSettings* modelInternalSettings_;
-    const InverseSolverSettings* solverSettings_;
-    
-    std::string solverName_;
-    InverseSolverType solverType_;
-    
+      
+      ocs2::PinocchioInterface* pinocchioInterface_;
+      const KinematicsInternalModelSettings* modelInternalSettings_;
+      const InverseSolverSettings* solverSettings_;
+      
+      std::string solverName_;
+      InverseSolverType solverType_;
+      
     private:
 
-    TaskType taskType_;
-
+      TaskType taskType_;
   };
-
 };
 #endif

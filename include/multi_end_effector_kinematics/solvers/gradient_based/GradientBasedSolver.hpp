@@ -28,21 +28,49 @@
 
 namespace multi_end_effector_kinematics
 {
-
   class GradientBasedSolver: public InverseSolverInterface
   {
-
     public:
     
+    /**
+     * Constructor
+     * Crate gradient base interface for inverse kinematics solver
+     * @warning Everything in input and output is defined in base frame of reference!
+     *
+     * @param [in] pinocchioInterface: OCS2 pinocchio interface (created by MultiEndEffectorKinematics)
+     * @param [in] modelInternalInfo: Internal kinematic model
+     * @param [in] solverSettings: Settings for inverse kinematics solver
+     */
     GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
-      const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
-
+      const KinematicsInternalModelSettings& modelInternalInfo, 
+      const InverseSolverSettings& solverSettings);
+    
+    /**
+     * Get one iteration of inverse kinematics algorithm (Δq) of q[n+1] = q[n] + Δq
+     *
+     * @param [in] actualJointPositions: Current joint positions
+     * @param [in] error: Difference between target and current end effector positions and transforms
+     * @param [in] endEffectorPositions: Positions of 3D end effectors
+     * @param [in] endEffectorTransforms: Transforms of 6D end effectors
+     * @param [out] jointDeltas: joint deltas Δq
+     * 
+     * @return Return status of task
+     */
     bool getJointDeltas(const Eigen::VectorXd& actualJointPositions, 
       const Eigen::VectorXd& error,
       const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& jointDeltas) override final;
-
+    
+    /**
+     * Get gradient of invserse kinematics task (do not have to be jacobian!)
+     *
+     * @param [in] actualJointPositions: Current joint positions
+     * @param [in] endEffectorPositions: Positions of 3D end effectors
+     * @param [in] endEffectorTransforms: Transforms of 6D end effectors
+     * 
+     * @return Task gradient
+     */
     virtual Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
       const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms) = 0;
@@ -55,9 +83,7 @@ namespace multi_end_effector_kinematics
 
     std::function<void(const Eigen::MatrixXd&,
       const Eigen::VectorXd&, Eigen::VectorXd&)> jointDeltasFunction_;
-
   };
-
 };
 
 #endif
