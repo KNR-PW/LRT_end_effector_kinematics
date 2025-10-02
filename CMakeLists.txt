@@ -43,7 +43,7 @@ add_library(${PROJECT_NAME}
   src/solvers/InverseSolverInterface.cpp
   src/solvers/gradient_based/GradientBasedSolver.cpp
   src/solvers/gradient_based/NewtonRaphson.cpp
-  src/solvers/gradient_based/NewtonRaphsonAD.cpp
+  # src/solvers/gradient_based/NewtonRaphsonAD.cpp
   src/MultiEndEffectorKinematics.cpp
 )
 

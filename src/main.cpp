@@ -78,15 +78,15 @@ int main(int argc, char** argv)
   // std::vector<std::string> threeDofLinks{};
   // std::vector<std::string> sixDofLinks{"tool0"};
   // multi_end_effector_kinematics::InverseSolverSettings solverSettings;
-  // solverSettings.dampingCoefficient_ = 1e-3;
-  // solverSettings.stepCoefficient_ = 0.005;
-  // solverSettings.maxIterations_ = 1000;
-  // solverSettings.tolerance_ = 1e-4;
+  // solverSettings.dampingCoefficient = 1e-3;
+  // solverSettings.stepCoefficient = 0.005;
+  // solverSettings.maxIterations = 1000;
+  // solverSettings.tolerance = 1e-4;
 
   // multi_end_effector_kinematics::KinematicsModelSettings modelSettings;
-  // modelSettings.baseLinkName_ = baseLinkName;
-  // modelSettings.threeDofEndEffectorNames_ = threeDofLinks;
-  // modelSettings.sixDofEndEffectorNames_ = sixDofLinks;
+  // modelSettings.baseLinkName = baseLinkName;
+  // modelSettings.threeDofEndEffectorNames = threeDofLinks;
+  // modelSettings.sixDofEndEffectorNames = sixDofLinks;
 
   // multi_end_effector_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
   //   modelSettings, solverSettings, solverName);
@@ -187,15 +187,15 @@ int main(int argc, char** argv)
   std::vector<std::string> threeDofLinks{};
   std::vector<std::string> sixDofLinks{"tool0"};
   multi_end_effector_kinematics::InverseSolverSettings solverSettings;
-  solverSettings.dampingCoefficient_ = 1e-3;
-  solverSettings.stepCoefficient_ = 0.005;
-  solverSettings.maxIterations_ = 1000;
-  solverSettings.tolerance_ = 1e-4;
+  solverSettings.dampingCoefficient = 1e-3;
+  solverSettings.stepCoefficient = 0.005;
+  solverSettings.maxIterations = 1000;
+  solverSettings.tolerance = 1e-4;
 
   multi_end_effector_kinematics::KinematicsModelSettings modelSettings;
-  modelSettings.baseLinkName_ = baseLinkName;
-  modelSettings.threeDofEndEffectorNames_ = threeDofLinks;
-  modelSettings.sixDofEndEffectorNames_ = sixDofLinks;
+  modelSettings.baseLinkName = baseLinkName;
+  modelSettings.threeDofEndEffectorNames = threeDofLinks;
+  modelSettings.sixDofEndEffectorNames = sixDofLinks;
 
   multi_end_effector_kinematics::InverseKinematicsTest inverseKinematicsTest(urdfPathName,
     modelSettings, solverSettings, solverName);

@@ -18,24 +18,24 @@ namespace multi_end_effector_kinematics
 
     pinocchio::computeJointJacobians(model, data, actualJointPositions);
 
-    const size_t rowSize = 3 * modelInternalSettings_->numThreeDofEndEffectors_ + 6 * modelInternalSettings_->numSixDofEndEffectors_;
+    const size_t rowSize = 3 * modelInternalSettings_->numThreeDofEndEffectors + 6 * modelInternalSettings_->numSixDofEndEffectors;
 
     Eigen::MatrixXd gradient(rowSize, model.nq);
 
-    for(size_t i = 0; i < modelInternalSettings_->numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_->numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices_[i];
+      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices[i];
       const size_t rowStartIndex = 3 * i;
       gradient.middleRows<3>(rowStartIndex) = -pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
     }
 
-    for(size_t i = modelInternalSettings_->numThreeDofEndEffectors_; i < modelInternalSettings_->numEndEffectors_; ++i)
+    for(size_t i = modelInternalSettings_->numThreeDofEndEffectors; i < modelInternalSettings_->numEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices_[i];
-      const pinocchio::SE3 errorTransformInv = endEffectorTransforms[i - modelInternalSettings_->numThreeDofEndEffectors_].actInv(data.oMf[frameIndex]);
+      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices[i];
+      const pinocchio::SE3 errorTransformInv = endEffectorTransforms[i - modelInternalSettings_->numThreeDofEndEffectors].actInv(data.oMf[frameIndex]);
       pinocchio::Data::Matrix6 Jlog;
       pinocchio::Jlog6(errorTransformInv, Jlog);
-      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_->numThreeDofEndEffectors_;
+      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_->numThreeDofEndEffectors;
       gradient.middleRows<6>(rowStartIndex) = -Jlog * pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
     }
 

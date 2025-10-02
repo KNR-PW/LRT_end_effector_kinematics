@@ -37,7 +37,7 @@ namespace multi_end_effector_kinematics
           { 
             Eigen::MatrixXd ggT;
             ggT.noalias() = gradient * gradient.transpose();
-            ggT.diagonal().array() += solverSettings_->dampingCoefficient_;
+            ggT.diagonal().array() += solverSettings_->dampingCoefficient;
             jointDeltas.noalias() = -gradient.transpose() * ggT.ldlt().solve(error);
           };
         }

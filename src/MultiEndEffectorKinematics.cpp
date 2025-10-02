@@ -24,13 +24,13 @@ namespace multi_end_effector_kinematics
       throw std::invalid_argument("The file " + urdfFilePath + " does not contain a valid URDF model!");
     }
 
-    if(modelSettings_.baseLinkName_ != "")
+    if(modelSettings_.baseLinkName != "")
     {
       // remove extraneous joints from urdf
       std::vector<std::string> jointsToRemove;
       std::vector<std::string> linksToRemove; 
 
-      ::urdf::LinkConstSharedPtr baseLink = urdfTree ->getLink(modelSettings_.baseLinkName_);
+      ::urdf::LinkConstSharedPtr baseLink = urdfTree ->getLink(modelSettings_.baseLinkName);
 
       // Get all parents of Base Link
       while(baseLink->getParent() != nullptr)
@@ -91,12 +91,12 @@ namespace multi_end_effector_kinematics
 
     const pinocchio::Model& model = pinocchioInterface_->getModel();
 
-    modelInternalSettings_.numThreeDofEndEffectors_ = modelSettings_.threeDofEndEffectorNames_.size();
-    modelInternalSettings_.numSixDofEndEffectors_ = modelSettings_.sixDofEndEffectorNames_.size();
+    modelInternalSettings_.numThreeDofEndEffectors = modelSettings_.threeDofEndEffectorNames.size();
+    modelInternalSettings_.numSixDofEndEffectors = modelSettings_.sixDofEndEffectorNames.size();
 
-    modelInternalSettings_.numEndEffectors_ = modelInternalSettings_.numThreeDofEndEffectors_ + modelInternalSettings_.numSixDofEndEffectors_;
+    modelInternalSettings_.numEndEffectors = modelInternalSettings_.numThreeDofEndEffectors + modelInternalSettings_.numSixDofEndEffectors;
 
-    for (const auto& name : modelSettings_.threeDofEndEffectorNames_) {
+    for (const auto& name : modelSettings_.threeDofEndEffectorNames) {
       const size_t threeDofEndEffectorFrameIndex = model.getFrameId(name);
       if(threeDofEndEffectorFrameIndex == model.frames.size())
       {
@@ -106,11 +106,11 @@ namespace multi_end_effector_kinematics
 
       const size_t threeDofEndEffectorJointIndex = model.frames[threeDofEndEffectorFrameIndex].parentJoint;
   
-      modelInternalSettings_.endEffectorFrameIndices_.push_back(threeDofEndEffectorFrameIndex);
-      modelInternalSettings_.endEffectorJointIndices_.push_back(threeDofEndEffectorJointIndex);
+      modelInternalSettings_.endEffectorFrameIndices.push_back(threeDofEndEffectorFrameIndex);
+      modelInternalSettings_.endEffectorJointIndices.push_back(threeDofEndEffectorJointIndex);
     }
 
-    for (const auto& name : modelSettings_.sixDofEndEffectorNames_) {
+    for (const auto& name : modelSettings_.sixDofEndEffectorNames) {
       const size_t sixDofEndEffectorFrameIndex = model.getFrameId(name);
       if(sixDofEndEffectorFrameIndex == model.frames.size())
       {
@@ -119,8 +119,8 @@ namespace multi_end_effector_kinematics
       }
       const size_t sixDofEndEffectorJointIndex = model.frames[sixDofEndEffectorFrameIndex].parentJoint;
   
-      modelInternalSettings_.endEffectorFrameIndices_.push_back(sixDofEndEffectorFrameIndex);
-      modelInternalSettings_.endEffectorJointIndices_.push_back(sixDofEndEffectorJointIndex);
+      modelInternalSettings_.endEffectorFrameIndices.push_back(sixDofEndEffectorFrameIndex);
+      modelInternalSettings_.endEffectorJointIndices.push_back(sixDofEndEffectorJointIndex);
     }
 
     solverImplementation_ = makeSolver(solverName);
@@ -135,8 +135,8 @@ namespace multi_end_effector_kinematics
     const std::vector<pinocchio::SE3>& endEffectorTransforms,
     Eigen::VectorXd& jointDeltas)
   {
-    assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors_);
-    assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors_);
+    assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors);
+    assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors);
 
     const auto& model = pinocchioInterface_->getModel();
     auto& data = pinocchioInterface_->getData();
@@ -147,8 +147,8 @@ namespace multi_end_effector_kinematics
 
     if(!checkPositionBounds(actualJointPositions))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
@@ -156,32 +156,32 @@ namespace multi_end_effector_kinematics
 
     Eigen::VectorXd error = getErrorPoses(endEffectorPositions, endEffectorTransforms);
     
-    if(error.norm() < solverSettings_.tolerance_)
+    if(error.norm() < solverSettings_.tolerance)
     {
-      returnValue.flag_ = TaskReturnFlag::FINISHED;
+      returnValue.flag = TaskReturnFlag::FINISHED;
       return returnValue; // early return
     }
         
     if(!solverImplementation_->getJointDeltas(actualJointPositions, error, endEffectorPositions,
       endEffectorTransforms, jointDeltas))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::SOLVER_ERROR;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::SOLVER_ERROR;
       return returnValue; // early return
     }
 
-    jointDeltas = solverSettings_.stepCoefficient_ * jointDeltas;
+    jointDeltas = solverSettings_.stepCoefficient * jointDeltas;
 
-    if(jointDeltas.norm() < solverSettings_.minimumStepSize_ && error.norm() > solverSettings_.tolerance_)
+    if(jointDeltas.norm() < solverSettings_.minimumStepSize && error.norm() > solverSettings_.tolerance)
     {
-      returnValue.success_= false;
-      returnValue.flag_= TaskReturnFlag::SMALL_STEP_SIZE;
+      returnValue.success= false;
+      returnValue.flag= TaskReturnFlag::SMALL_STEP_SIZE;
     }
 
     if(!checkVelocityBounds(jointDeltas))
     {
-      returnValue.success_ = false;
-      returnValue.flag_= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
@@ -224,8 +224,8 @@ namespace multi_end_effector_kinematics
     Eigen::VectorXd& newJointPositions)
   {
 
-    assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors_);
-    assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors_);
+    assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors);
+    assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors);
 
     const auto& model = pinocchioInterface_->getModel();
     auto& data = pinocchioInterface_->getData();
@@ -236,8 +236,8 @@ namespace multi_end_effector_kinematics
 
     if(!checkPositionBounds(actualJointPositions))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
@@ -245,13 +245,13 @@ namespace multi_end_effector_kinematics
 
     newJointPositions = actualJointPositions;
     
-    while(iteration < solverSettings_.maxIterations_)
+    while(iteration < solverSettings_.maxIterations)
     {
       pinocchio::framesForwardKinematics(model, data, newJointPositions);
       const Eigen::VectorXd error = getErrorPoses(endEffectorPositions, endEffectorTransforms);
-      if(error.norm() < solverSettings_.tolerance_)
+      if(error.norm() < solverSettings_.tolerance)
       {
-        returnValue.flag_ = TaskReturnFlag::FINISHED;
+        returnValue.flag = TaskReturnFlag::FINISHED;
         return returnValue; // early return
       }
 
@@ -260,25 +260,25 @@ namespace multi_end_effector_kinematics
       if(!solverImplementation_->getJointDeltas(newJointPositions, error, endEffectorPositions,
       endEffectorTransforms, jointDeltas))
       {
-        returnValue.success_= false;
-        returnValue.flag_ = TaskReturnFlag::SOLVER_ERROR;
+        returnValue.success= false;
+        returnValue.flag = TaskReturnFlag::SOLVER_ERROR;
         return returnValue; // early return
       }
 
-      jointDeltas = solverSettings_.stepCoefficient_ * jointDeltas;
+      jointDeltas = solverSettings_.stepCoefficient * jointDeltas;
       newJointPositions = pinocchio::integrate(model, newJointPositions, jointDeltas);
 
-      if(jointDeltas.norm() < solverSettings_.minimumStepSize_ && error.norm() > solverSettings_.tolerance_)
+      if(jointDeltas.norm() < solverSettings_.minimumStepSize && error.norm() > solverSettings_.tolerance)
       {
-        returnValue.success_= false;
-        returnValue.flag_ = TaskReturnFlag::SMALL_STEP_SIZE;
+        returnValue.success= false;
+        returnValue.flag = TaskReturnFlag::SMALL_STEP_SIZE;
         return returnValue; // early return
       }
 
       if(!checkPositionBounds(newJointPositions))
       {
-        returnValue.success_ = false;
-        returnValue.flag_ = TaskReturnFlag::NEW_POSITION_OUT_OF_BOUNDS;
+        returnValue.success = false;
+        returnValue.flag = TaskReturnFlag::NEW_POSITION_OUT_OF_BOUNDS;
         return returnValue; // early return
       }
       
@@ -322,8 +322,8 @@ namespace multi_end_effector_kinematics
     const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
     Eigen::VectorXd& jointVelocities)
   {
-    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors_);
-    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors_);
+    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
+    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors);
 
     const auto& model = pinocchioInterface_->getModel();
 
@@ -333,8 +333,8 @@ namespace multi_end_effector_kinematics
 
     if(!checkPositionBounds(actualJointPositions))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
@@ -342,34 +342,34 @@ namespace multi_end_effector_kinematics
 
     if(jacobian.determinant() < modelSettings_.singularityThreshold)
     {
-      returnValue.success_= false;
-      returnValue.flag_ = TaskReturnFlag::SINGULARITY;
+      returnValue.success= false;
+      returnValue.flag = TaskReturnFlag::SINGULARITY;
       return returnValue; // early return
     }
 
     Eigen::VectorXd velocities;
 
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
       velocities << endEffectorVelocities[i];
     }
 
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors_; i < modelInternalSettings_.numEndEffectors_; ++i)
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
-      velocities << endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors_];
+      velocities << endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors];
     }
 
     jointVelocities.noalias() = jacobian.ldlt().solve(velocities);
 
     if(!checkVelocityBounds(jointVelocities))
     {
-      returnValue.success_ = false;
-      returnValue.flag_= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
-    returnValue.success_= true;
-    returnValue.flag_ = TaskReturnFlag::FINISHED;
+    returnValue.success= true;
+    returnValue.flag = TaskReturnFlag::FINISHED;
     return returnValue; 
   }
 
@@ -409,8 +409,8 @@ namespace multi_end_effector_kinematics
     Eigen::VectorXd& jointVelocities)
   {
 
-    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors_);
-    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors_);
+    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
+    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors);
 
     const auto& model = pinocchioInterface_->getModel();
 
@@ -420,8 +420,8 @@ namespace multi_end_effector_kinematics
 
     if(!checkPositionBounds(actualJointPositions))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
@@ -429,31 +429,31 @@ namespace multi_end_effector_kinematics
 
     Eigen::VectorXd velocities;
 
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
       velocities << endEffectorVelocities[i];
     }
 
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors_; i < modelInternalSettings_.numEndEffectors_; ++i)
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
-      velocities << endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors_];
+      velocities << endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors];
     }
 
     Eigen::MatrixXd jjT;
     jjT.noalias() = jacobian * jacobian.transpose();
-    jjT.diagonal().array() += solverSettings_.dampingCoefficient_;
+    jjT.diagonal().array() += solverSettings_.dampingCoefficient;
 
     jointVelocities.noalias() = jacobian.transpose() * jjT.ldlt().solve(velocities);
 
     if(!checkVelocityBounds(jointVelocities))
     {
-      returnValue.success_ = false;
-      returnValue.flag_= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
-    returnValue.success_= true;
-    returnValue.flag_ = TaskReturnFlag::FINISHED;
+    returnValue.success= true;
+    returnValue.flag = TaskReturnFlag::FINISHED;
     return returnValue; 
   }
 
@@ -492,8 +492,8 @@ namespace multi_end_effector_kinematics
     std::vector<pinocchio::SE3>& endEffectorTransforms)
   {
 
-    assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors_);
-    assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors_);
+    assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors);
+    assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors);
     
     const auto& model = pinocchioInterface_->getModel();
     auto& data = pinocchioInterface_->getData();
@@ -504,30 +504,30 @@ namespace multi_end_effector_kinematics
 
     if(!checkPositionBounds(actualJointPositions))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
     pinocchio::framesForwardKinematics(model, data, actualJointPositions);
 
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[i];
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const auto position = data.oMf[frameIndex].translation();
       endEffectorPositions[i] = position;
     }
     
-    for(size_t i = 0; i < modelInternalSettings_.numSixDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numSixDofEndEffectors; ++i)
     {
-      const size_t sixDofIndex = i + modelInternalSettings_.numThreeDofEndEffectors_;
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[sixDofIndex];
+      const size_t sixDofIndex = i + modelInternalSettings_.numThreeDofEndEffectors;
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[sixDofIndex];
       const auto transform = data.oMf[frameIndex];
       endEffectorTransforms[i] = transform;
     }
 
-    returnValue.success_= true;
-    returnValue.flag_ = TaskReturnFlag::FINISHED;
+    returnValue.success= true;
+    returnValue.flag = TaskReturnFlag::FINISHED;
     return returnValue;
   }
 
@@ -564,8 +564,8 @@ namespace multi_end_effector_kinematics
     std::vector<Eigen::Vector3d>& endEffectorVelocities, 
     std::vector<Eigen::Vector<double, 6>>& endEffectorTwists)
   {
-    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors_);
-    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors_);
+    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
+    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors);
     
     const auto& model = pinocchioInterface_->getModel();
     auto& data = pinocchioInterface_->getData();
@@ -577,39 +577,39 @@ namespace multi_end_effector_kinematics
 
     if(!checkPositionBounds(actualJointPositions))
     {
-      returnValue.success_ = false;
-      returnValue.flag_ = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
     if(!checkVelocityBounds(actualJointVelocities))
     {
-      returnValue.success_ = false;
-      returnValue.flag_= TaskReturnFlag::CURRENT_VELOCITY_OUT_OF_BOUNDS;
+      returnValue.success = false;
+      returnValue.flag= TaskReturnFlag::CURRENT_VELOCITY_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
 
     pinocchio::forwardKinematics(model, data, actualJointPositions, actualJointVelocities);
 
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[i];
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const auto velocity = pinocchio::getFrameVelocity(model, data, frameIndex, 
         pinocchio::LOCAL_WORLD_ALIGNED).linear();
       endEffectorVelocities[i] = velocity;
     }
     
-    for(size_t i = 0; i < modelInternalSettings_.numSixDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numSixDofEndEffectors; ++i)
     {
-      const size_t sixDofIndex = i + modelInternalSettings_.numThreeDofEndEffectors_;
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[sixDofIndex];
+      const size_t sixDofIndex = i + modelInternalSettings_.numThreeDofEndEffectors;
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[sixDofIndex];
       const auto twist = pinocchio::getFrameVelocity(model, data, frameIndex, 
         pinocchio::LOCAL_WORLD_ALIGNED).toVector();
       endEffectorTwists[i] = twist;
     }
 
-    returnValue.success_= true;
-    returnValue.flag_ = TaskReturnFlag::FINISHED;
+    returnValue.success= true;
+    returnValue.flag = TaskReturnFlag::FINISHED;
     return returnValue;
   }
 
@@ -652,21 +652,21 @@ namespace multi_end_effector_kinematics
 
     pinocchio::computeJointJacobians(model, data, actualJointPositions);
 
-    const size_t rowSize = 3 * modelInternalSettings_.numThreeDofEndEffectors_ + 6 * modelInternalSettings_.numSixDofEndEffectors_;
+    const size_t rowSize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 6 * modelInternalSettings_.numSixDofEndEffectors;
 
     Eigen::MatrixXd jacobian(rowSize, model.nq);
 
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[i];
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const size_t rowStartIndex = 3 * i;
       jacobian.middleRows<3>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
     }
 
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors_; i < modelInternalSettings_.numEndEffectors_; ++i)
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[i];
-      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors_;
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
+      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors;
       jacobian.middleRows<6>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
     }
 
@@ -682,16 +682,16 @@ namespace multi_end_effector_kinematics
     const auto& data = pinocchioInterface_->getData();
     Eigen::VectorXd error;
 
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors_; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[i];
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       error << data.oMf[frameIndex].rotation().transpose() * (endEffectorPositions[i] - data.oMf[frameIndex].translation());
     }
 
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors_; i < modelInternalSettings_.numEndEffectors_; ++i)
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices_[i];
-      const pinocchio::SE3 errorTransform = data.oMf[frameIndex].actInv(endEffectorTransforms[i - modelInternalSettings_.numThreeDofEndEffectors_]);
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
+      const pinocchio::SE3 errorTransform = data.oMf[frameIndex].actInv(endEffectorTransforms[i - modelInternalSettings_.numThreeDofEndEffectors]);
       error << pinocchio::log6(errorTransform).toVector();
     }
 

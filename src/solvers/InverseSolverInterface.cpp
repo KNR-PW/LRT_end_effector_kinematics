@@ -9,10 +9,10 @@ namespace multi_end_effector_kinematics
   {
     const auto& model = pinocchioInterface.getModel();
     
-    const size_t outputDim = 3 * modelInternalInfo.numThreeDofEndEffectors_ + 6 * modelInternalInfo.numSixDofEndEffectors_;
+    const size_t outputDim = 3 * modelInternalInfo.numThreeDofEndEffectors + 6 * modelInternalInfo.numSixDofEndEffectors;
     const size_t jointDofDim = model.nv;
 
-    if(solverSettings.dampingCoefficient_ > 0.0) taskType_ = TaskType::DAMPED;
+    if(solverSettings.dampingCoefficient > 0.0) taskType_ = TaskType::DAMPED;
     else if(jointDofDim > outputDim) taskType_ = TaskType::REDUNDANT;
     else if(jointDofDim == outputDim) taskType_ = TaskType::NORMAL;
     else if(jointDofDim < outputDim)
