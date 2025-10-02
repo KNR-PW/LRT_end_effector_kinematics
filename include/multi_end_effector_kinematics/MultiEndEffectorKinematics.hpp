@@ -364,6 +364,8 @@ namespace multi_end_effector_kinematics
        */
       bool checkVelocityBounds(const Eigen::VectorXd& jointVelocities);
 
+      const pinocchio::Model& getPinocchioModel();
+
       const KinematicsModelSettings& getModelSettings();
 
       const KinematicsInternalModelSettings& getModelInternalSettings();

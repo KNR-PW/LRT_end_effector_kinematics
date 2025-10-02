@@ -178,13 +178,6 @@ namespace multi_end_effector_kinematics
       returnValue.flag= TaskReturnFlag::SMALL_STEP_SIZE;
     }
 
-    if(!checkVelocityBounds(jointDeltas))
-    {
-      returnValue.success = false;
-      returnValue.flag= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
-      return returnValue; // early return
-    }
-
     return returnValue;
   }
 
@@ -729,6 +722,14 @@ namespace multi_end_effector_kinematics
     }
     
     return true;
+  }
+
+  /******************************************************************************************************/
+  /******************************************************************************************************/
+  /******************************************************************************************************/
+  const pinocchio::Model& MultiEndEffectorKinematics::getPinocchioModel()
+  {
+    return pinocchioInterface_->getModel();
   }
 
   /******************************************************************************************************/
