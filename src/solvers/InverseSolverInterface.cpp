@@ -7,7 +7,7 @@ namespace multi_end_effector_kinematics
 {
   InverseSolverInterface::InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
     const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings):
-    pinocchioInterface_(&pinocchioInterface), modelInternalSettings_(&modelInternalSettings), solverSettings_(&solverSettings)
+    pinocchioInterface_(&pinocchioInterface), modelInternalSettings_(modelInternalSettings), solverSettings_(solverSettings)
   {
     const auto& model = pinocchioInterface.getModel();
     
@@ -38,21 +38,21 @@ namespace multi_end_effector_kinematics
 
     pinocchio::computeJointJacobians(model, data, actualJointPositions);
 
-    const size_t rowSize = 3 * modelInternalSettings_->numThreeDofEndEffectors + 6 * modelInternalSettings_->numSixDofEndEffectors;
+    const size_t rowSize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 6 * modelInternalSettings_.numSixDofEndEffectors;
 
     Eigen::MatrixXd jacobian(rowSize, model.nq);
 
-    for(size_t i = 0; i < modelInternalSettings_->numThreeDofEndEffectors; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices[i];
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const size_t rowStartIndex = 3 * i;
       jacobian.middleRows<3>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL_WORLD_ALIGNED).topRows<3>();
     }
 
-    for(size_t i = modelInternalSettings_->numThreeDofEndEffectors; i < modelInternalSettings_->numEndEffectors; ++i)
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices[i];
-      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_->numThreeDofEndEffectors;
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
+      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors;
       jacobian.middleRows<6>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL_WORLD_ALIGNED);
     }
     

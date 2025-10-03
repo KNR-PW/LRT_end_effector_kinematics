@@ -44,17 +44,17 @@ namespace multi_end_effector_kinematics
 
     ocs2::ad_vector_t error;
 
-    for(size_t i = 0; i < modelInternalSettings_->numThreeDofEndEffectors; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices[i];
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const Eigen::Matrix<ocs2::ad_scalar_t, 3, 1> errorPosition = -data.oMf[frameIndex].rotation().transpose() * data.oMf[frameIndex].translation();
       error <<  errorPosition;
     }
 
-    for(size_t i = modelInternalSettings_->numThreeDofEndEffectors; i < modelInternalSettings_->numEndEffectors; ++i)
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
-      const size_t frameIndex = modelInternalSettings_->endEffectorFrameIndices[i];
-      const size_t logTargetTransformsIndex = 6* (i - modelInternalSettings_->numThreeDofEndEffectors);
+      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
+      const size_t logTargetTransformsIndex = 6* (i - modelInternalSettings_.numThreeDofEndEffectors);
       const SE3AD targetTransform = pinocchio::exp6(logEndEffectorTransforms.middleRows<6>(logTargetTransformsIndex));
       const SE3AD errorTransform = data.oMf[frameIndex].actInv(targetTransform);
       const Eigen::Matrix<ocs2::ad_scalar_t, 6, 1> errorLogTransform = pinocchio::log6(errorTransform).toVector();

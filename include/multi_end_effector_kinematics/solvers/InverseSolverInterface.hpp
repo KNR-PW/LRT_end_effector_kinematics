@@ -104,8 +104,8 @@ namespace multi_end_effector_kinematics
     protected:
       
       ocs2::PinocchioInterface* pinocchioInterface_;
-      const KinematicsInternalModelSettings* modelInternalSettings_;
-      const InverseSolverSettings* solverSettings_;
+      const KinematicsInternalModelSettings modelInternalSettings_;
+      const InverseSolverSettings solverSettings_;
       
       std::string solverName_;
       InverseSolverType solverType_;

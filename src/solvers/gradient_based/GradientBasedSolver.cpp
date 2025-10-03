@@ -37,7 +37,7 @@ namespace multi_end_effector_kinematics
           { 
             Eigen::MatrixXd ggT;
             ggT.noalias() = gradient * gradient.transpose();
-            ggT.diagonal().array() += solverSettings_->dampingCoefficient;
+            ggT.diagonal().array() += solverSettings_.dampingCoefficient;
             jointDeltas.noalias() = -gradient.transpose() * ggT.ldlt().solve(error);
           };
         }
@@ -51,11 +51,12 @@ namespace multi_end_effector_kinematics
     const std::vector<pinocchio::SE3>& endEffectorTransforms,
     Eigen::VectorXd& jointDeltas)
   {
+    
     Eigen::MatrixXd gradient = getGradient(actualJointPositions,
       endEffectorPositions, endEffectorTransforms);
-
+    
     jointDeltasFunction_(gradient, error, jointDeltas);
-
+    
     return true;
   }
 

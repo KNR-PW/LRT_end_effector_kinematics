@@ -95,8 +95,8 @@ namespace multi_end_effector_kinematics
     modelInternalSettings_.numSixDofEndEffectors = modelSettings_.sixDofEndEffectorNames.size();
 
     modelInternalSettings_.numEndEffectors = modelInternalSettings_.numThreeDofEndEffectors + modelInternalSettings_.numSixDofEndEffectors;
-
-    for (const auto& name : modelSettings_.threeDofEndEffectorNames) {
+    for (const auto& name : modelSettings_.threeDofEndEffectorNames) 
+    {
       const size_t threeDofEndEffectorFrameIndex = model.getFrameId(name);
       if(threeDofEndEffectorFrameIndex == model.frames.size())
       {
@@ -217,12 +217,12 @@ namespace multi_end_effector_kinematics
 
     assert(endEffectorPositions.size() == modelInternalSettings_.numThreeDofEndEffectors);
     assert(endEffectorTransforms.size() == modelInternalSettings_.numSixDofEndEffectors);
-
+    
     const auto& model = pinocchioInterface_->getModel();
     auto& data = pinocchioInterface_->getData();
 
     assert(actualJointPositions.rows() == model.nq);
-
+    
     ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
 
     if(!checkPositionBounds(actualJointPositions))
@@ -231,7 +231,7 @@ namespace multi_end_effector_kinematics
       returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
       return returnValue; // early return
     }
-
+    
     size_t iteration = 0;
 
     newJointPositions.noalias() = actualJointPositions;
@@ -245,7 +245,7 @@ namespace multi_end_effector_kinematics
         returnValue.flag = TaskReturnFlag::FINISHED;
         break; // early return
       }
-
+      
       Eigen::VectorXd jointDeltas;
 
       if(!solverImplementation_->getJointDeltas(newJointPositions, error, endEffectorPositions,
@@ -255,7 +255,7 @@ namespace multi_end_effector_kinematics
         returnValue.flag = TaskReturnFlag::SOLVER_ERROR;
         break; // early return
       }
-
+      
       jointDeltas = solverSettings_.stepCoefficient * jointDeltas;
       newJointPositions = pinocchio::integrate(model, newJointPositions, jointDeltas);
 
