@@ -45,18 +45,19 @@ namespace multi_end_effector_kinematics
        * @warning Everything in input and output is defined in base frame of reference!
        *
        * @param [in] pinocchioInterface: OCS2 pinocchio interface (created by MultiEndEffectorKinematics)
-       * @param [in] modelInternalInfo: Internal kinematic model
+       * @param [in] modelInternalSettings: Internal kinematic model
        * @param [in] solverSettings: Settings for inverse kinematics solver
        */
       InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
-        const KinematicsInternalModelSettings& modelInternalInfo, 
+        const KinematicsInternalModelSettings& modelInternalSettings, 
         const InverseSolverSettings& solverSettings);
       
       /**
        * Get one iteration of inverse kinematics algorithm (Δq) of q[n+1] = q[n] + Δq
        *
        * @param [in] actualJointPositions: Current joint positions
-       * @param [in] error: Difference between target and current end effector positions and transforms
+       * @param [in] error: Difference between target and current end effector 
+       *  positions and transforms in local frame of reference
        * @param [in] endEffectorPositions: Positions of 3D end effectors
        * @param [in] endEffectorTransforms: Transforms of 6D end effectors
        * @param [out] jointDeltas: joint deltas Δq
@@ -68,6 +69,29 @@ namespace multi_end_effector_kinematics
         const std::vector<Eigen::Vector3d>& endEffectorPositions,
         const std::vector<pinocchio::SE3>& endEffectorTransforms,
         Eigen::VectorXd& jointDeltas) = 0;
+      
+      /**
+       * Get joint velocities using inverse kinematics algorithm
+       *
+       * @param [in] actualJointPositions: Current joint positions
+       * @param [in] endEffectorVelocities: Concatenated end effector velocities 
+       *  (3 DoF + 6 DoF) in local frame of reference
+       * @param [out] jointVelocities: Joint velocities
+       * 
+       * @return Return status of task
+       */
+      virtual bool getJointVelocities(const Eigen::VectorXd& actualJointPositions, 
+        const Eigen::VectorXd& endEffectorVelocities, 
+        Eigen::VectorXd& jointVelocities) = 0;
+
+      /**
+       * Get stacked jacobian matrix for every end effector
+       * 
+       * @param [in] actualJointPositions: Current joint positions
+       * 
+       * @return Stacked jacobian matrix
+       */
+      Eigen::MatrixXd getJacobian(const Eigen::VectorXd& actualJointPositions);
 
       virtual InverseSolverType getSolverType() = 0;
 

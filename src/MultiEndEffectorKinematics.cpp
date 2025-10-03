@@ -12,9 +12,9 @@ namespace multi_end_effector_kinematics
   /******************************************************************************************************/
   MultiEndEffectorKinematics::MultiEndEffectorKinematics(const std::string urdfFilePath,
     const KinematicsModelSettings modelSettings,
-    InverseSolverSettings solverSettings,
+    const InverseSolverSettings solverSettings,
     const std::string solverName)
-      :modelSettings_(modelSettings), solverSettings_(solverSettings)
+      :modelSettings_(std::move(modelSettings)), solverSettings_(std::move(solverSettings))
   {
     using joint_pair_t = std::pair<const std::string, std::shared_ptr<::urdf::Joint>>;
 
@@ -100,7 +100,6 @@ namespace multi_end_effector_kinematics
       const size_t threeDofEndEffectorFrameIndex = model.getFrameId(name);
       if(threeDofEndEffectorFrameIndex == model.frames.size())
       {
-        std::cout << "KinematicsModelSettings error: Could not find end effector frame!" << std::endl;
         throw std::invalid_argument("Could not find end effector frame with name: " + name);
       }
 
@@ -114,7 +113,6 @@ namespace multi_end_effector_kinematics
       const size_t sixDofEndEffectorFrameIndex = model.getFrameId(name);
       if(sixDofEndEffectorFrameIndex == model.frames.size())
       {
-        std::cout << "KinematicsModelSettings error: Could not find end effector frame!" << std::endl;
         throw std::invalid_argument("Could not find end effector frame with name: " + name);
       }
       const size_t sixDofEndEffectorJointIndex = model.frames[sixDofEndEffectorFrameIndex].parentJoint;
@@ -236,7 +234,7 @@ namespace multi_end_effector_kinematics
 
     size_t iteration = 0;
 
-    newJointPositions = actualJointPositions;
+    newJointPositions.noalias() = actualJointPositions;
     
     while(iteration < solverSettings_.maxIterations)
     {
@@ -245,7 +243,7 @@ namespace multi_end_effector_kinematics
       if(error.norm() < solverSettings_.tolerance)
       {
         returnValue.flag = TaskReturnFlag::FINISHED;
-        return returnValue; // early return
+        break; // early return
       }
 
       Eigen::VectorXd jointDeltas;
@@ -255,7 +253,7 @@ namespace multi_end_effector_kinematics
       {
         returnValue.success= false;
         returnValue.flag = TaskReturnFlag::SOLVER_ERROR;
-        return returnValue; // early return
+        break; // early return
       }
 
       jointDeltas = solverSettings_.stepCoefficient * jointDeltas;
@@ -265,18 +263,19 @@ namespace multi_end_effector_kinematics
       {
         returnValue.success= false;
         returnValue.flag = TaskReturnFlag::SMALL_STEP_SIZE;
-        return returnValue; // early return
+        break; // early return
       }
 
       if(!checkPositionBounds(newJointPositions))
       {
         returnValue.success = false;
         returnValue.flag = TaskReturnFlag::NEW_POSITION_OUT_OF_BOUNDS;
-        return returnValue; // early return
+        break; // early return
       }
       
       iteration++;
     }
+    
     return returnValue;
   }
 
@@ -312,7 +311,7 @@ namespace multi_end_effector_kinematics
   ReturnStatus MultiEndEffectorKinematics::calculateJointVelocities(
     const Eigen::VectorXd& actualJointPositions, 
     const std::vector<Eigen::Vector3d>& endEffectorVelocities,
-    const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
+    const std::vector<pinocchio::Motion>& endEffectorTwists,
     Eigen::VectorXd& jointVelocities)
   {
     assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
@@ -331,28 +330,16 @@ namespace multi_end_effector_kinematics
       return returnValue; // early return
     }
 
-    const auto jacobian = getJacobian(actualJointPositions);
+    const Eigen::VectorXd concatVelocity = getConcatenatedVelocities(endEffectorVelocities,
+      endEffectorTwists);
 
-    if(jacobian.determinant() < modelSettings_.singularityThreshold)
+    if(!solverImplementation_->getJointVelocities(actualJointPositions, 
+      concatVelocity, jointVelocities))
     {
       returnValue.success= false;
-      returnValue.flag = TaskReturnFlag::SINGULARITY;
+      returnValue.flag = TaskReturnFlag::SOLVER_ERROR;
       return returnValue; // early return
     }
-
-    Eigen::VectorXd velocities;
-
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
-    {
-      velocities << endEffectorVelocities[i];
-    }
-
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
-    {
-      velocities << endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors];
-    }
-
-    jointVelocities.noalias() = jacobian.ldlt().solve(velocities);
 
     if(!checkVelocityBounds(jointVelocities))
     {
@@ -374,7 +361,7 @@ namespace multi_end_effector_kinematics
     const std::vector<Eigen::Vector3d>& endEffectorVelocities,
     Eigen::VectorXd& jointVelocities)
   {
-    const std::vector<Eigen::Vector<double, 6>> emptyTwists;
+    const std::vector<pinocchio::Motion> emptyTwists;
     return calculateJointVelocities(actualJointPositions, endEffectorVelocities,
       emptyTwists, jointVelocities);
   }
@@ -384,95 +371,11 @@ namespace multi_end_effector_kinematics
   /******************************************************************************************************/
   ReturnStatus MultiEndEffectorKinematics::calculateJointVelocities(
     const Eigen::VectorXd& actualJointPositions, 
-    const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
+    const std::vector<pinocchio::Motion>& endEffectorTwists,
     Eigen::VectorXd& jointVelocities)
   {
     const std::vector<Eigen::Vector3d> emptyVelocities;
     return calculateJointVelocities(actualJointPositions, emptyVelocities,
-      endEffectorTwists, jointVelocities);
-  }
-
-  /******************************************************************************************************/
-  /******************************************************************************************************/
-  /******************************************************************************************************/
-  ReturnStatus MultiEndEffectorKinematics::calculateDampedJointVelocities(
-    const Eigen::VectorXd& actualJointPositions, 
-    const std::vector<Eigen::Vector3d>& endEffectorVelocities,
-    const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
-    Eigen::VectorXd& jointVelocities)
-  {
-
-    assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
-    assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors);
-
-    const auto& model = pinocchioInterface_->getModel();
-
-    assert(actualJointPositions.rows() == model.nq);
-
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
-
-    if(!checkPositionBounds(actualJointPositions))
-    {
-      returnValue.success = false;
-      returnValue.flag = TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS;
-      return returnValue; // early return
-    }
-
-    const Eigen::MatrixXd jacobian = getJacobian(actualJointPositions);
-
-    Eigen::VectorXd velocities;
-
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
-    {
-      velocities << endEffectorVelocities[i];
-    }
-
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
-    {
-      velocities << endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors];
-    }
-
-    Eigen::MatrixXd jjT;
-    jjT.noalias() = jacobian * jacobian.transpose();
-    jjT.diagonal().array() += solverSettings_.dampingCoefficient;
-
-    jointVelocities.noalias() = jacobian.transpose() * jjT.ldlt().solve(velocities);
-
-    if(!checkVelocityBounds(jointVelocities))
-    {
-      returnValue.success = false;
-      returnValue.flag= TaskReturnFlag::NEW_VELOCITY_OUT_OF_BOUNDS;
-      return returnValue; // early return
-    }
-
-    returnValue.success= true;
-    returnValue.flag = TaskReturnFlag::FINISHED;
-    return returnValue; 
-  }
-
-  /******************************************************************************************************/
-  /******************************************************************************************************/
-  /******************************************************************************************************/
-  ReturnStatus MultiEndEffectorKinematics::calculateDampedJointVelocities(
-    const Eigen::VectorXd& actualJointPositions, 
-    const std::vector<Eigen::Vector3d>& endEffectorVelocities,
-    Eigen::VectorXd& jointVelocities)
-  {
-    const std::vector<Eigen::Vector<double, 6>> emptyTwists;
-    return calculateDampedJointVelocities(actualJointPositions, endEffectorVelocities,
-      emptyTwists, jointVelocities);
-  }
-
-  /******************************************************************************************************/
-  /******************************************************************************************************/
-  /******************************************************************************************************/
-  ReturnStatus MultiEndEffectorKinematics::calculateDampedJointVelocities(
-    const Eigen::VectorXd& actualJointPositions, 
-    const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
-    Eigen::VectorXd& jointVelocities)
-  {
-    const std::vector<Eigen::Vector3d> emptyVelocities;
-    return calculateDampedJointVelocities(actualJointPositions, emptyVelocities,
       endEffectorTwists, jointVelocities);
   }
 
@@ -555,7 +458,7 @@ namespace multi_end_effector_kinematics
     const Eigen::VectorXd& actualJointPositions, 
     const Eigen::VectorXd& actualJointVelocities,
     std::vector<Eigen::Vector3d>& endEffectorVelocities, 
-    std::vector<Eigen::Vector<double, 6>>& endEffectorTwists)
+    std::vector<pinocchio::Motion>& endEffectorTwists)
   {
     assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
     assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors);
@@ -597,7 +500,7 @@ namespace multi_end_effector_kinematics
       const size_t sixDofIndex = i + modelInternalSettings_.numThreeDofEndEffectors;
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[sixDofIndex];
       const auto twist = pinocchio::getFrameVelocity(model, data, frameIndex, 
-        pinocchio::LOCAL_WORLD_ALIGNED).toVector();
+        pinocchio::LOCAL_WORLD_ALIGNED);
       endEffectorTwists[i] = twist;
     }
 
@@ -614,7 +517,7 @@ namespace multi_end_effector_kinematics
     const Eigen::VectorXd& actualJointVelocities,
     std::vector<Eigen::Vector3d>& endEffectorVelocities)
   {
-    std::vector<Eigen::Vector<double, 6>> emptyTwists;
+    std::vector<pinocchio::Motion> emptyTwists;
     return calculateEndEffectorVelocities(actualJointPositions, actualJointVelocities, 
       endEffectorVelocities, emptyTwists);
   }
@@ -625,7 +528,7 @@ namespace multi_end_effector_kinematics
   ReturnStatus MultiEndEffectorKinematics::calculateEndEffectorVelocities(
     const Eigen::VectorXd& actualJointPositions, 
     const Eigen::VectorXd& actualJointVelocities, 
-    std::vector<Eigen::Vector<double, 6>>& endEffectorTwists)
+    std::vector<pinocchio::Motion>& endEffectorTwists)
   {
     std::vector<Eigen::Vector3d> emptyVelocities;
     return calculateEndEffectorVelocities(actualJointPositions, actualJointVelocities, 
@@ -638,57 +541,64 @@ namespace multi_end_effector_kinematics
   Eigen::MatrixXd MultiEndEffectorKinematics::getJacobian(
     const Eigen::VectorXd& actualJointPositions)
   {
-    const auto& model = pinocchioInterface_->getModel();
-    auto& data = pinocchioInterface_->getData();
-
-    assert(actualJointPositions.rows() == model.nq);
-
-    pinocchio::computeJointJacobians(model, data, actualJointPositions);
-
-    const size_t rowSize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 6 * modelInternalSettings_.numSixDofEndEffectors;
-
-    Eigen::MatrixXd jacobian(rowSize, model.nq);
-
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
-    {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
-      const size_t rowStartIndex = 3 * i;
-      jacobian.middleRows<3>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
-    }
-
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
-    {
-      const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
-      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors;
-      jacobian.middleRows<6>(rowStartIndex) = pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL);
-    }
-
-    return jacobian;
+    return solverImplementation_->getJacobian(actualJointPositions);
   }
 
   /******************************************************************************************************/
   /******************************************************************************************************/
   /******************************************************************************************************/
-  Eigen::VectorXd MultiEndEffectorKinematics::getErrorPoses(const std::vector<Eigen::Vector3d>& endEffectorPositions,
+  Eigen::VectorXd MultiEndEffectorKinematics::getErrorPoses(
+    const std::vector<Eigen::Vector3d>& endEffectorPositions,
     const std::vector<pinocchio::SE3>& endEffectorTransforms)
   {
     const auto& data = pinocchioInterface_->getData();
-    Eigen::VectorXd error;
+
+    const size_t errorSize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 
+      6 * modelInternalSettings_.numSixDofEndEffectors;
+    
+    Eigen::VectorXd error(errorSize);
 
     for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
-      error << data.oMf[frameIndex].rotation().transpose() * (endEffectorPositions[i] - data.oMf[frameIndex].translation());
+      error.block<3, 1>(3 * i, 0) = data.oMf[frameIndex].rotation().transpose() * 
+        (endEffectorPositions[i] - data.oMf[frameIndex].translation());
     }
 
     for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
     {
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const pinocchio::SE3 errorTransform = data.oMf[frameIndex].actInv(endEffectorTransforms[i - modelInternalSettings_.numThreeDofEndEffectors]);
-      error << pinocchio::log6(errorTransform).toVector();
+      const size_t startIndex =  6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors;
+      error.block<6, 1>(startIndex, 0) = pinocchio::log6(errorTransform).toVector();
     }
 
     return error;
+  }
+
+  Eigen::VectorXd MultiEndEffectorKinematics::getConcatenatedVelocities(
+    const std::vector<Eigen::Vector3d>& endEffectorVelocities, 
+    const std::vector<pinocchio::Motion>& endEffectorTwists)
+  {
+    const auto& data = pinocchioInterface_->getData();
+
+    const size_t velocitySize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 
+      6 * modelInternalSettings_.numSixDofEndEffectors;
+
+    Eigen::VectorXd velocities(velocitySize);
+
+    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
+    {
+      velocities.block<3, 1>(3 * i, 0) = endEffectorVelocities[i];
+    }
+
+    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
+    {
+      const size_t startIndex =  6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors;
+      velocities.block<6, 1>(startIndex, 0) = endEffectorTwists[i - modelInternalSettings_.numThreeDofEndEffectors].toVector();
+    }
+
+    return velocities;
   }
 
   /******************************************************************************************************/

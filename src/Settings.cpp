@@ -31,9 +31,6 @@ namespace multi_end_effector_kinematics
       case TaskReturnFlag::SMALL_STEP_SIZE:
         returnString = "SMALL_STEP_SIZE";
         break;
-      case TaskReturnFlag::SINGULARITY:
-        returnString = "SINGULARITY";
-        break;
     }
     return returnString;
   }

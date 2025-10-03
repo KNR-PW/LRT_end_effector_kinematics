@@ -38,10 +38,13 @@ namespace multi_end_effector_kinematics
     double minimumStepSize = 1e-6;
 
     // Damping coefficient for damped inverse jacobian matrix: J^T * (J * J^T + λ * I)^-1
-    double dampingCoefficient = 1e-4; 
+    double dampingCoefficient = 1e-10; 
 
     // Coefficient multiplied with new Δq
     double stepCoefficient = 0.5; // > 0
+
+    // Threshold for checking if robot is in singularity
+    double singularityThreshold = 1e-6;
   };
 
   struct KinematicsModelSettings
@@ -54,9 +57,6 @@ namespace multi_end_effector_kinematics
 
     // Vector of all end effectors with 6 DoF
     std::vector<std::string> sixDofEndEffectorNames;
-
-    // Threshold for checking if robot is in singularity
-    double singularityThreshold = 1.0;
   };
 
   struct KinematicsInternalModelSettings
@@ -92,7 +92,6 @@ namespace multi_end_effector_kinematics
     NEW_POSITION_OUT_OF_BOUNDS = 5,
     NEW_VELOCITY_OUT_OF_BOUNDS = 6,
     SMALL_STEP_SIZE = 7,
-    SINGULARITY = 8,
   };
 
   enum class InverseSolverType

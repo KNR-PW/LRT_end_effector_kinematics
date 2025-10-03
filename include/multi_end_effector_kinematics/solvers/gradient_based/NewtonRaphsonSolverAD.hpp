@@ -38,7 +38,7 @@ namespace multi_end_effector_kinematics
     public:
 
       NewtonRaphsonSolverAD(ocs2::PinocchioInterface& pinocchioInterface,
-        const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings);
+        const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings);
 
       Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
         const std::vector<Eigen::Vector3d>& endEffectorPositions,

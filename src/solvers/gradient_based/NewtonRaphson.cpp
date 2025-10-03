@@ -3,8 +3,8 @@
 namespace multi_end_effector_kinematics
 {
   NewtonRaphsonSolver::NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
-    const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings): 
-      GradientBasedSolver(pinocchioInterface, modelInternalInfo, solverSettings)
+    const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings): 
+      GradientBasedSolver(pinocchioInterface, modelInternalSettings, solverSettings)
   {
     solverName_ = "NewtonRaphson";
   }
@@ -20,7 +20,7 @@ namespace multi_end_effector_kinematics
 
     const size_t rowSize = 3 * modelInternalSettings_->numThreeDofEndEffectors + 6 * modelInternalSettings_->numSixDofEndEffectors;
 
-    Eigen::MatrixXd gradient(rowSize, model.nq);
+    Eigen::MatrixXd gradient(rowSize, model.nv);
 
     for(size_t i = 0; i < modelInternalSettings_->numThreeDofEndEffectors; ++i)
     {

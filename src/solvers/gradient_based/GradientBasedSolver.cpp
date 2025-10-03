@@ -3,8 +3,8 @@
 namespace multi_end_effector_kinematics
 {
   GradientBasedSolver::GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
-    const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings): 
-      InverseSolverInterface(pinocchioInterface, modelInternalInfo, solverSettings)
+    const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings): 
+      InverseSolverInterface(pinocchioInterface, modelInternalSettings, solverSettings)
   {
     solverType_ = InverseSolverType::GRADIENT_BASED;
     switch(getTaskType())
@@ -13,16 +13,16 @@ namespace multi_end_effector_kinematics
         {
 
           jointDeltasFunction_ = [&](const Eigen::MatrixXd& gradient,
-                                      const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
+            const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
           { 
-            jointDeltas.noalias() = -gradient.ldlt().solve(error);
+            jointDeltas.noalias() = -gradient.partialPivLu().solve(error);
           };
         }
         break;
       case TaskType::REDUNDANT:
         {
           jointDeltasFunction_ = [&](const Eigen::MatrixXd& gradient,
-                                      const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
+            const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
           { 
             Eigen::MatrixXd ggT;
             ggT.noalias() = gradient * gradient.transpose();
@@ -55,6 +55,17 @@ namespace multi_end_effector_kinematics
       endEffectorPositions, endEffectorTransforms);
 
     jointDeltasFunction_(gradient, error, jointDeltas);
+
+    return true;
+  }
+
+  bool GradientBasedSolver::getJointVelocities(const Eigen::VectorXd& actualJointPositions, 
+    const Eigen::VectorXd& endEffectorVelocities,
+    Eigen::VectorXd& jointVelocities)
+  {
+    const auto jacobian = getJacobian(actualJointPositions);
+
+    jointVelocities.noalias() = jacobian.partialPivLu().solve(endEffectorVelocities);
 
     return true;
   }

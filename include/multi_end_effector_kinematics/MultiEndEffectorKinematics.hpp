@@ -160,7 +160,7 @@ namespace multi_end_effector_kinematics
        */
       ReturnStatus calculateJointVelocities(const Eigen::VectorXd& actualJointPositions, 
         const std::vector<Eigen::Vector3d>& endEffectorVelocities,
-        const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
+        const std::vector<pinocchio::Motion>& endEffectorTwists,
         Eigen::VectorXd& jointVelocities);
 
       /**
@@ -194,55 +194,8 @@ namespace multi_end_effector_kinematics
        * @warning Results might be catastrophic when robot is close to or in singularity!
        */
       ReturnStatus calculateJointVelocities(const Eigen::VectorXd& actualJointPositions, 
-        const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
+        const std::vector<pinocchio::Motion>& endEffectorTwists,
         Eigen::VectorXd& jointVelocities);
-
-      /**
-       * Get joint velocities by classic inverse damped Jacobian method:
-       * dq/dt = J^T * (J * J^T + λ * I)^-1 * v
-       *
-       * @param [in] actualJointPositions: Current joint positions
-       * @param [in] endEffectorVelocities: Velocities of 3D end effectors
-       * @param [in] endEffectorTwists: Velocities of 6D end effectors
-       * @param [out] jointVelocities: Joint velocities
-       * 
-       * @return Return status of task
-       */
-      ReturnStatus calculateDampedJointVelocities(const Eigen::VectorXd& actualJointPositions, 
-        const std::vector<Eigen::Vector3d>& endEffectorVelocities,
-        const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
-        Eigen::VectorXd& jointVelocities);
-
-      /**
-       * Get joint velocities by classic inverse damped Jacobian method:
-       * dq/dt = J^T * (J * J^T + λ * I)^-1 * v
-       * Version for models with only 3D end effectors
-       *
-       * @param [in] actualJointPositions: Current joint positions
-       * @param [in] endEffectorVelocities: Velocities of 3D end effectors
-       * @param [out] jointVelocities: Joint velocities
-       * 
-       * @return Return status of task
-       */
-      ReturnStatus calculateDampedJointVelocities(const Eigen::VectorXd& actualJointPositions, 
-        const std::vector<Eigen::Vector3d>& endEffectorVelocities,
-        Eigen::VectorXd& jointVelocities);
-
-      /**
-       * Get joint velocities by classic inverse damped Jacobian method:
-       * dq/dt = J^T * (J * J^T + λ * I)^-1 * v
-       * Version for models with only 6D end effectors
-       *
-       * @param [in] actualJointPositions: Current joint positions
-       * @param [in] endEffectorTwists: Velocities of 6D end effectors
-       * @param [out] jointVelocities: Joint velocities
-       * 
-       * @return Return status of task
-       */
-      ReturnStatus calculateDampedJointVelocities(const Eigen::VectorXd& actualJointPositions, 
-        const std::vector<Eigen::Vector<double, 6>>& endEffectorTwists,
-        Eigen::VectorXd& jointVelocities);
-
       
       /**
        * Get poses from forward kinematics
@@ -303,7 +256,7 @@ namespace multi_end_effector_kinematics
       ReturnStatus calculateEndEffectorVelocities(const Eigen::VectorXd& actualJointPositions, 
         const Eigen::VectorXd& actualJointVelocities,
         std::vector<Eigen::Vector3d>& endEffectorVelocities, 
-        std::vector<Eigen::Vector<double, 6>>& endEffectorTwists);
+        std::vector<pinocchio::Motion>& endEffectorTwists);
 
       /**
        * Get end effector velocities from forward kinematics
@@ -335,7 +288,7 @@ namespace multi_end_effector_kinematics
        */
       ReturnStatus calculateEndEffectorVelocities(const Eigen::VectorXd& actualJointPositions, 
         const Eigen::VectorXd& actualJointVelocities, 
-        std::vector<Eigen::Vector<double, 6>>& endEffectorTwists);
+        std::vector<pinocchio::Motion>& endEffectorTwists);
 
       /**
        * Get stacked jacobian matrix for every end effector
@@ -388,12 +341,16 @@ namespace multi_end_effector_kinematics
         const std::vector<Eigen::Vector3d>& endEffectorPositions,
         const std::vector<pinocchio::SE3>& endEffectorTransforms);
 
+      Eigen::VectorXd getConcatenatedVelocities(
+        const std::vector<Eigen::Vector3d>& endEffectorVelocities, 
+        const std::vector<pinocchio::Motion>& endEffectorTwists);
+
       std::unique_ptr<InverseSolverInterface> makeSolver(const std::string& solverName);
 
 
-      KinematicsModelSettings modelSettings_;
+      const KinematicsModelSettings modelSettings_;
       KinematicsInternalModelSettings modelInternalSettings_;
-      InverseSolverSettings solverSettings_;
+      const InverseSolverSettings solverSettings_;
       std::unique_ptr<InverseSolverInterface> solverImplementation_;
   };
 }; // multi_end_effector_kinematics

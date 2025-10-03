@@ -3,8 +3,8 @@
 namespace multi_end_effector_kinematics
 {
   NewtonRaphsonSolverAD::NewtonRaphsonSolverAD(ocs2::PinocchioInterface& pinocchioInterface,
-    const KinematicsInternalModelSettings& modelInternalInfo, const InverseSolverSettings& solverSettings): 
-      GradientBasedSolver(pinocchioInterface, modelInternalInfo, solverSettings)
+    const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings): 
+      GradientBasedSolver(pinocchioInterface, modelInternalSettings, solverSettings)
   {
     solverName_ = "NewtonRaphsonAD";
 

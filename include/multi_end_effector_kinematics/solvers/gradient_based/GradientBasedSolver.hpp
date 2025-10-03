@@ -38,11 +38,11 @@ namespace multi_end_effector_kinematics
      * @warning Everything in input and output is defined in base frame of reference!
      *
      * @param [in] pinocchioInterface: OCS2 pinocchio interface (created by MultiEndEffectorKinematics)
-     * @param [in] modelInternalInfo: Internal kinematic model
+     * @param [in] modelInternalSettings: Internal kinematic model
      * @param [in] solverSettings: Settings for inverse kinematics solver
      */
     GradientBasedSolver(ocs2::PinocchioInterface& pinocchioInterface,
-      const KinematicsInternalModelSettings& modelInternalInfo, 
+      const KinematicsInternalModelSettings& modelInternalSettings, 
       const InverseSolverSettings& solverSettings);
     
     /**
@@ -61,6 +61,22 @@ namespace multi_end_effector_kinematics
       const std::vector<Eigen::Vector3d>& endEffectorPositions,
       const std::vector<pinocchio::SE3>& endEffectorTransforms,
       Eigen::VectorXd& jointDeltas) override final;
+    
+    /**
+     * Get joint velocities using gradient algorithms:
+     * dq/dt = J^-1 * v, or when robot is close to singularity
+     * dq/dt = J^T * (J * J^T + λ * I)^-1 * v
+     *
+     * @param [in] actualJointPositions: Current joint positions
+     * @param [in] endEffectorVelocities: Velocities of 3D end effectors
+     * @param [in] endEffectorTwists: Velocities of 6D end effectors
+     * @param [out] jointVelocities: Joint velocities
+     * 
+     * @return Return status of task
+     */
+    bool getJointVelocities(const Eigen::VectorXd& actualJointPositions, 
+      const Eigen::VectorXd& endEffectorVelocities, 
+      Eigen::VectorXd& jointVelocities) override final;
     
     /**
      * Get gradient of invserse kinematics task (do not have to be jacobian!)
