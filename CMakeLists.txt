@@ -6,6 +6,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
+option(ACTIVE_BENCHMARKS "Build benchmarks")
 
 # Resolve for the package path at compile time.
 configure_file (
@@ -108,6 +109,11 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(
+  DIRECTORY benchmarks
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_export_dependencies(${THIS_PACKAGE_DEPENDS})
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
@@ -123,13 +129,14 @@ if(BUILD_TESTING)
   target_include_directories(${PROJECT_NAME}_test PRIVATE test/include)
   target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
   target_compile_options(${PROJECT_NAME}_test PUBLIC ${FLAGS})
-  # # the following line skips the linter which checks for copyrights
-  # # comment the line when a copyright and license is added to all source files
-  # set(ament_cmake_copyright_FOUND TRUE)
-  # # the following line skips cpplint (only works in a git repo)
-  # # comment the line when this package is in a git repo and when
-  # # a copyright and license is added to all source files
-  # set(ament_cmake_cpplint_FOUND TRUE)
+
+  if(ACTIVE_BENCHMARKS)
+    find_package(ament_cmake_google_benchmark REQUIRED)
+    ament_add_google_benchmark(${PROJECT_NAME}_benchmark benchmarks/NewtonRaphsonBenchmark.cpp)
+    target_include_directories(${PROJECT_NAME}_benchmark PRIVATE benchmarks/include)
+    target_link_libraries(${PROJECT_NAME}_benchmark ${PROJECT_NAME})
+    target_compile_options(${PROJECT_NAME}_benchmark PUBLIC ${FLAGS})
+  endif()
 endif()
 
 ament_package()

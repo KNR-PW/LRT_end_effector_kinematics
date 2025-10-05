@@ -7,9 +7,6 @@
   <maintainer email="bartlomiejk@vp.pl">bartek</maintainer>
   <license>GPL-3.0-only</license>
 
-  <!-- <depend>eigen3_cmake_module</depend>
-  <depend>eigen</depend>
-  <depend>pinocchio</depend> -->
   <depend>ocs2_pinocchio_interface</depend>
   <depend>ocs2_robotic_tools</depend>
 
@@ -17,6 +14,8 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_google_benchmark</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

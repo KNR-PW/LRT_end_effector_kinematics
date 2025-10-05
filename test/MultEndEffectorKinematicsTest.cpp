@@ -96,7 +96,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointPositionsThreeDoF)
 
   for(int i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;;
+    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd dq = Eigen::VectorXd::Random(model.nq) / 10;
 
     pinocchio::framesForwardKinematics(model, data, q + dq);
