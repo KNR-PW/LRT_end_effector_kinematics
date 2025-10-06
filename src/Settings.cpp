@@ -57,11 +57,14 @@ namespace multi_end_effector_kinematics
       case TaskType::NORMAL:
         returnString = "NORMAL";
         break;
-      case TaskType::DAMPED:
-        returnString = "DAMPED";
+      case TaskType::NORMAL_DAMPED:
+        returnString = "NORMAL_DAMPED";
         break;
       case TaskType::REDUNDANT:
         returnString = "REDUNDANT";
+        break;
+      case TaskType::REDUNDANT_DAMPED:
+        returnString = "REDUNDANT_DAMPED";
         break;
     }
     return returnString;

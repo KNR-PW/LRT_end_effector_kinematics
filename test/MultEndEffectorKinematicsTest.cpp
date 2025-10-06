@@ -180,6 +180,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesThreeDoF)
     {
       const Eigen::Vector3d newVelocity = pinocchio::getFrameVelocity(model, data, 
         endEffectorIndexes[i], pinocchio::LOCAL_WORLD_ALIGNED).linear();
+
       EXPECT_TRUE(threeDofVelocities[i].isApprox(newVelocity, tolerance));
     }
 
@@ -238,8 +239,10 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesThreeDoF)
       threeDofVelocities.push_back(pinocchio::getFrameVelocity(model, data, 
         endEffectorIndexes[i], pinocchio::LOCAL_WORLD_ALIGNED).linear());
     }
-
-    std::vector<Eigen::Vector3d> newVelocities(4);
+    Eigen::Vector3d zeroVelocity = Eigen::Vector3d::Zero();
+    std::vector<Eigen::Vector3d> newVelocities{zeroVelocity, zeroVelocity, 
+      zeroVelocity, zeroVelocity};
+   
     const auto result = kinematicsTest.calculateEndEffectorVelocities(q, v, newVelocities);
 
     for(size_t i = 0; i < 4; ++i)

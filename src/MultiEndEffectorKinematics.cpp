@@ -490,18 +490,16 @@ namespace multi_end_effector_kinematics
     for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
-      const auto velocity = pinocchio::getFrameVelocity(model, data, frameIndex, 
+      endEffectorVelocities[i].noalias() = pinocchio::getFrameVelocity(model, data, frameIndex, 
         pinocchio::LOCAL_WORLD_ALIGNED).linear();
-      endEffectorVelocities[i] = velocity;
     }
     
     for(size_t i = 0; i < modelInternalSettings_.numSixDofEndEffectors; ++i)
     {
       const size_t sixDofIndex = i + modelInternalSettings_.numThreeDofEndEffectors;
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[sixDofIndex];
-      const auto twist = pinocchio::getFrameVelocity(model, data, frameIndex, 
+      endEffectorTwists[i] = pinocchio::getFrameVelocity(model, data, frameIndex, 
         pinocchio::LOCAL_WORLD_ALIGNED);
-      endEffectorTwists[i] = twist;
     }
 
     returnValue.success= true;

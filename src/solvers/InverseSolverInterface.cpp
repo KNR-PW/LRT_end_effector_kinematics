@@ -14,12 +14,36 @@ namespace multi_end_effector_kinematics
     const size_t outputDim = 3 * modelInternalSettings.numThreeDofEndEffectors + 6 * modelInternalSettings.numSixDofEndEffectors;
     const size_t jointDofDim = model.nv;
 
-    if(solverSettings.dampingCoefficient > 0.0) taskType_ = TaskType::DAMPED;
-    else if(jointDofDim > outputDim) taskType_ = TaskType::REDUNDANT;
-    else if(jointDofDim == outputDim) taskType_ = TaskType::NORMAL;
-    else if(jointDofDim < outputDim)
+    bool redundant = jointDofDim > outputDim;
+    bool normal = jointDofDim == outputDim;
+    bool damped = solverSettings.dampingCoefficient > 0.0;
+
+    if(normal)
     {
-      throw std::logic_error("InverseSolverInterface: Task is overconstrained, not supported!");
+      if(damped)
+      {
+        taskType_ = TaskType::NORMAL_DAMPED;
+      }
+      else
+      {
+        taskType_ = TaskType::NORMAL;
+      }
+    }
+    else if(redundant)
+    {
+      if(damped)
+      {
+        taskType_ = TaskType::REDUNDANT_DAMPED;
+      }
+      else
+      {
+        taskType_ = TaskType::REDUNDANT;
+      }
+    }
+    else
+    {
+      throw std::logic_error("InverseSolverInterface: Task is overconstrained, "
+        "not supported!");
     }
   }
 

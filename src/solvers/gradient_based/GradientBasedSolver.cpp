@@ -7,15 +7,21 @@ namespace multi_end_effector_kinematics
       InverseSolverInterface(pinocchioInterface, modelInternalSettings, solverSettings)
   {
     solverType_ = InverseSolverType::GRADIENT_BASED;
+
     switch(getTaskType())
     {
       case TaskType::NORMAL:
         {
-
           jointDeltasFunction_ = [&](const Eigen::MatrixXd& gradient,
             const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
           { 
             jointDeltas.noalias() = -gradient.partialPivLu().solve(error);
+          };
+
+          jointVelocityFunction_ = [&](const Eigen::MatrixXd& jacobian,
+            const Eigen::VectorXd& endEffectorVelocity, Eigen::VectorXd& jointVelocity)
+          { 
+            jointVelocity.noalias() = jacobian.partialPivLu().solve(endEffectorVelocity);
           };
         }
         break;
@@ -24,13 +30,20 @@ namespace multi_end_effector_kinematics
           jointDeltasFunction_ = [&](const Eigen::MatrixXd& gradient,
             const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
           { 
-            Eigen::MatrixXd ggT;
-            ggT.noalias() = gradient * gradient.transpose();
+            Eigen::MatrixXd ggT = gradient * gradient.transpose();
             jointDeltas.noalias() = -gradient.transpose() * ggT.ldlt().solve(error);
+          };
+
+          jointVelocityFunction_ = [&](const Eigen::MatrixXd& jacobian,
+            const Eigen::VectorXd& endEffectorVelocity, Eigen::VectorXd& jointVelocity)
+          { 
+            Eigen::MatrixXd jjT = jacobian * jacobian.transpose();
+            jointVelocity.noalias() = jacobian.transpose() * jjT.ldlt().solve(
+              endEffectorVelocity);
           };
         }
         break;
-      case TaskType::DAMPED:
+      case TaskType::NORMAL_DAMPED:
         {
           jointDeltasFunction_ = [&](const Eigen::MatrixXd& gradient,
                                       const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
@@ -39,6 +52,32 @@ namespace multi_end_effector_kinematics
             ggT.noalias() = gradient * gradient.transpose();
             ggT.diagonal().array() += solverSettings_.dampingCoefficient;
             jointDeltas.noalias() = -gradient.transpose() * ggT.ldlt().solve(error);
+          };
+
+          jointVelocityFunction_ = [&](const Eigen::MatrixXd& jacobian,
+            const Eigen::VectorXd& endEffectorVelocity, Eigen::VectorXd& jointVelocity)
+          { 
+            jointVelocity.noalias() = jacobian.partialPivLu().solve(endEffectorVelocity);
+          };
+        }
+        break;
+      case TaskType::REDUNDANT_DAMPED:
+        {
+          jointDeltasFunction_ = [&](const Eigen::MatrixXd& gradient,
+                                      const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas)
+          { 
+            Eigen::MatrixXd ggT;
+            ggT.noalias() = gradient * gradient.transpose();
+            ggT.diagonal().array() += solverSettings_.dampingCoefficient;
+            jointDeltas.noalias() = -gradient.transpose() * ggT.ldlt().solve(error);
+          };
+
+          jointVelocityFunction_ = [&](const Eigen::MatrixXd& jacobian,
+            const Eigen::VectorXd& endEffectorVelocity, Eigen::VectorXd& jointVelocity)
+          { 
+            Eigen::MatrixXd jjT = jacobian * jacobian.transpose();
+            jointVelocity.noalias() = jacobian.transpose() * jjT.ldlt().solve(
+              endEffectorVelocity);
           };
         }
         break;
@@ -66,7 +105,7 @@ namespace multi_end_effector_kinematics
   {
     const auto jacobian = getJacobian(actualJointPositions);
 
-    jointVelocities.noalias() = jacobian.partialPivLu().solve(endEffectorVelocities);
+    jointVelocityFunction_(jacobian, endEffectorVelocities, jointVelocities);
 
     return true;
   }

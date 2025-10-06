@@ -104,7 +104,8 @@ namespace multi_end_effector_kinematics
   {
     NORMAL = 0,
     REDUNDANT = 1,
-    DAMPED = 2,
+    NORMAL_DAMPED = 2,
+    REDUNDANT_DAMPED = 3,
   };
 
   struct ReturnStatus

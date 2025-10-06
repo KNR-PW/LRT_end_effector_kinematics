@@ -206,7 +206,7 @@ namespace multi_end_effector_kinematics
        * 
        * @return Return status of task
        * 
-       * @warning Output vectors needs to be resized before calling!
+       * @warning Output vectors needs to be resized ans set to zero before calling!
        */
       ReturnStatus calculateEndEffectorPoses(const Eigen::VectorXd& actualJointPositions, 
         std::vector<Eigen::Vector3d>& endEffectorPositions,
@@ -221,7 +221,7 @@ namespace multi_end_effector_kinematics
        * 
        * @return Return status of task
        * 
-       * @warning Output vectors needs to be resized before calling!
+       * @warning Output vectors needs to be resized ans set to zero before calling!
        */
       ReturnStatus calculateEndEffectorPoses(const Eigen::VectorXd& actualJointPositions, 
         std::vector<Eigen::Vector3d>& endEffectorPositions);
@@ -235,7 +235,7 @@ namespace multi_end_effector_kinematics
        * 
        * @return Return status of task
        * 
-       * @warning Output vectors needs to be resized before calling!
+       * @warning Output vectors needs to be resized ans set to zero before calling!
        */
       ReturnStatus calculateEndEffectorPoses(const Eigen::VectorXd& actualJointPositions, 
         std::vector<pinocchio::SE3>& endEffectorTransforms);
@@ -250,7 +250,7 @@ namespace multi_end_effector_kinematics
        * 
        * @return Return status of task
        * 
-       * @warning Output vectors needs to be resized before calling!
+       * @warning Output vectors needs to be resized ans set to zero before calling!
        * @warning All velocities are classically defined (LOCAL_WORLD_ALIGNED)
        */
       ReturnStatus calculateEndEffectorVelocities(const Eigen::VectorXd& actualJointPositions, 
@@ -267,7 +267,7 @@ namespace multi_end_effector_kinematics
        * @param [out] endEffectorVelocities: Velocities of 3D end effectors
        * 
        * @return Return status of task
-       * @warning Output vectors needs to be resized before calling!
+       * @warning Output vectors needs to be resized ans set to zero before calling!
        * @warning All velocities are classically defined (LOCAL_WORLD_ALIGNED)
        */
       ReturnStatus calculateEndEffectorVelocities(const Eigen::VectorXd& actualJointPositions, 
@@ -283,7 +283,7 @@ namespace multi_end_effector_kinematics
        * @param [out] endEffectorTwists: Velocities of 6D end effectors
        * 
        * @return Return status of task
-       * @warning Output vectors needs to be resized before calling!
+       * @warning Output vectors needs to be resized ans set to zero before calling!
        * @warning All velocities are classically defined (LOCAL_WORLD_ALIGNED)
        */
       ReturnStatus calculateEndEffectorVelocities(const Eigen::VectorXd& actualJointPositions, 

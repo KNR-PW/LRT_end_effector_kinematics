@@ -99,6 +99,9 @@ namespace multi_end_effector_kinematics
 
     std::function<void(const Eigen::MatrixXd&,
       const Eigen::VectorXd&, Eigen::VectorXd&)> jointDeltasFunction_;
+
+    std::function<void(const Eigen::MatrixXd&,
+      const Eigen::VectorXd&, Eigen::VectorXd&)> jointVelocityFunction_;
   };
 };
 
