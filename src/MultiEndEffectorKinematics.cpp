@@ -13,15 +13,30 @@ namespace multi_end_effector_kinematics
   MultiEndEffectorKinematics::MultiEndEffectorKinematics(const std::string urdfFilePath,
     const KinematicsModelSettings modelSettings,
     const InverseSolverSettings solverSettings,
-    const std::string solverName)
+    const std::string solverName, bool fromFile)
       :modelSettings_(std::move(modelSettings)), solverSettings_(std::move(solverSettings))
   {
     using joint_pair_t = std::pair<const std::string, std::shared_ptr<::urdf::Joint>>;
 
     // Get model from file
-    ::urdf::ModelInterfaceSharedPtr urdfTree = ::urdf::parseURDFFile(urdfFilePath);
-    if (urdfTree == nullptr) {
-      throw std::invalid_argument("The file " + urdfFilePath + " does not contain a valid URDF model!");
+    ::urdf::ModelInterfaceSharedPtr urdfTree;
+    if(fromFile)
+    {
+      urdfTree = ::urdf::parseURDFFile(urdfFilePath);
+      if (urdfTree == nullptr) 
+      {
+        throw std::invalid_argument("The file " + urdfFilePath + 
+          " does not contain a valid URDF model!");
+      }
+    } 
+    else
+    {
+      urdfTree = ::urdf::parseURDF(urdfFilePath);
+      if (urdfTree == nullptr) 
+      {
+        throw std::invalid_argument("Parsed XML string" 
+          " does not contain a valid URDF model!");
+      }
     }
 
     if(modelSettings_.baseLinkName != "")

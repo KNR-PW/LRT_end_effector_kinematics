@@ -49,15 +49,16 @@ namespace multi_end_effector_kinematics
        * Create forward and inverse kinematics solver for multiple end effectors
        * @warning Everything in input and output is defined in base frame of reference!
        *
-       * @param [in] urdfFilePath: Absolute file path to URDF file
+       * @param [in] urdfFile: Absolute file path to URDF file or URDF XML string
        * @param [in] modelSettings: Settings for kinematic model
        * @param [in] solverSettings: Settings for inverse kinematics solver
        * @param [in] solverName: name of solver (currently only "NewtonRaphson")
+       * @param [in] fromFile: Flag whether "urdfFile" is file path or xml string
        */
       MultiEndEffectorKinematics(const std::string urdfFilePath,
         const KinematicsModelSettings modelSettings,
         const InverseSolverSettings solverSettings,
-        const std::string solverName);
+        const std::string solverName, bool fromFile = true);
       
       /**
        * Get one iteration of inverse kinematics algorithm (Δq) of q[n+1] = q[n] + Δq
