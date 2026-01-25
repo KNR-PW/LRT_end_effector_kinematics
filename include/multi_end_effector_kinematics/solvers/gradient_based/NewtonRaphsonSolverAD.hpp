@@ -20,12 +20,6 @@
 #ifndef __NEWTON_RAPHSON_AD_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
 #define __NEWTON_RAPHSON_AD_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
 
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/spatial/explog.hpp>
-#include <pinocchio/algorithm/joint-configuration.hpp>
-
 #include <multi_end_effector_kinematics/solvers/InverseSolverInterface.hpp>
 #include <multi_end_effector_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
 
@@ -38,7 +32,8 @@ namespace multi_end_effector_kinematics
     public:
 
       NewtonRaphsonSolverAD(ocs2::PinocchioInterface& pinocchioInterface,
-        const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings);
+        const KinematicsInternalModelSettings& modelInternalSettings, 
+        const InverseSolverSettings& solverSettings);
 
       Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
         const std::vector<Eigen::Vector3d>& endEffectorPositions,
@@ -51,7 +46,7 @@ namespace multi_end_effector_kinematics
       ocs2::ad_vector_t getErrorPositionsCppAd(
         ocs2::PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
         const ocs2::ad_vector_t& actualJointPositions,
-        const ocs2::ad_vector_t& jointVelocityDeltas,
+        const ocs2::ad_vector_t& endEffectorPositions,
         const ocs2::ad_vector_t& logEndEffectorTransforms);
 
       std::unique_ptr<ocs2::CppAdInterface> errorPositionsAdFunction_;

@@ -21,5 +21,6 @@
 #define __SOLVER_LIST_MULTI_END_EFFECTOR_KINEMATICS__
 
 #include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonSolver.hpp>
+#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonSolverAD.hpp>
 
 #endif

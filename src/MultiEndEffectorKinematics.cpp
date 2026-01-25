@@ -714,6 +714,10 @@ namespace multi_end_effector_kinematics
     {
       solverPtr.reset(new NewtonRaphsonSolver(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
     }
+    else if(solverName == "NewtonRaphsonAD")
+    {
+      solverPtr.reset(new NewtonRaphsonSolverAD(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
+    }
     else
     {
       throw std::invalid_argument("MultiEndEffectorKinematics: Wrong solver name!");
