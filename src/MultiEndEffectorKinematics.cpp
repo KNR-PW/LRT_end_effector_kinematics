@@ -574,8 +574,7 @@ namespace multi_end_effector_kinematics
     for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
-      error.block<3, 1>(3 * i, 0) = data.oMf[frameIndex].rotation().transpose() * 
-        (endEffectorPositions[i] - data.oMf[frameIndex].translation());
+      error.block<3, 1>(3 * i, 0) = endEffectorPositions[i] - data.oMf[frameIndex].translation();
     }
 
     for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)

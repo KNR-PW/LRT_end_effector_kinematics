@@ -20,7 +20,6 @@ namespace multi_end_effector_kinematics
     const auto& model = pinocchioInterface.getModel();
 
     const size_t jointSize = model.nv;
-    const size_t threeDofSize = 3 * modelInternalSettings.numThreeDofEndEffectors;
     const size_t sixDofSize = 6 * modelInternalSettings.numSixDofEndEffectors;
 
     // positions error function
@@ -30,16 +29,15 @@ namespace multi_end_effector_kinematics
       auto pinocchioInterfaceCppAd = pinocchioInterface.toCppAd();
   
       const ad_vector_t actualJointPositions = x;
-      const ad_vector_t endEffectorPositions = p.head(threeDofSize);
-      const ad_vector_t logEndEffectorTransforms = p.tail(sixDofSize);
+      const ad_vector_t logEndEffectorTransforms = p;
       y = getErrorPositionsCppAd(pinocchioInterfaceCppAd, actualJointPositions, 
-        endEffectorPositions, logEndEffectorTransforms);
+        logEndEffectorTransforms);
     };
 
     errorPositionsAdFunction_.reset(new CppAdInterface(posiitonErrorApproxFunc,
-      jointSize, threeDofSize + sixDofSize, "newton_raphson_ad"));
+      jointSize, sixDofSize, "newton_raphson_ad"));
 
-    errorPositionsAdFunction_->createModels(CppAdInterface::ApproximationOrder::First, true);
+    errorPositionsAdFunction_->createModels(CppAdInterface::ApproximationOrder::First, false);
   }
 
   Eigen::MatrixXd NewtonRaphsonSolverAD::getGradient(const Eigen::VectorXd& actualJointPositions,
@@ -47,18 +45,12 @@ namespace multi_end_effector_kinematics
     const std::vector<pinocchio::SE3>& endEffectorTransforms)
   {
 
-    const size_t rowSize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 6 * modelInternalSettings_.numSixDofEndEffectors;
+    const size_t rowSize = 6 * modelInternalSettings_.numSixDofEndEffectors;
     vector_t positons(rowSize);
-
-    for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
-    {
-      const size_t rowStartIndex = 3 * i;
-      positons.middleRows<3>(rowStartIndex) = endEffectorPositions[i];
-    }
     
-    for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)
+    for(size_t i = 0; i < modelInternalSettings_.numSixDofEndEffectors; ++i)
     {
-      const size_t rowStartIndex = 6 * i - 3 * modelInternalSettings_.numThreeDofEndEffectors;
+      const size_t rowStartIndex = 6 * i;
       positons.middleRows<6>(rowStartIndex) = pinocchio::log6(endEffectorTransforms[i]).toVector();
     }
 
@@ -75,7 +67,6 @@ namespace multi_end_effector_kinematics
   ad_vector_t NewtonRaphsonSolverAD::getErrorPositionsCppAd(
     PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
     const ad_vector_t& actualJointPositions,
-    const ad_vector_t& endEffectorPositions,
     const ad_vector_t& logEndEffectorTransforms)
   {
 
@@ -92,11 +83,8 @@ namespace multi_end_effector_kinematics
     for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
-      const SE3AD targetTransform(data.oMf[frameIndex].rotation(), endEffectorPositions.middleRows<3>(3 * i));
-      const SE3AD errorTransform = data.oMf[frameIndex].actInv(targetTransform);
-      const auto errorLog6 = pinocchio::log6(errorTransform);
       const size_t rowStartIndex = 3 * i;
-      error.middleRows<3>(rowStartIndex) = errorLog6.toVector().topRows<3>();
+      error.middleRows<3>(rowStartIndex) = -data.oMf[frameIndex].translation();
     }
 
     for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)

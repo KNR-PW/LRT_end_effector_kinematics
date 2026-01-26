@@ -26,7 +26,7 @@ namespace multi_end_effector_kinematics
     {
       const size_t frameIndex = modelInternalSettings_.endEffectorFrameIndices[i];
       const size_t rowStartIndex = 3 * i;
-      gradient.middleRows<3>(rowStartIndex) = -pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL).topRows<3>();
+      gradient.middleRows<3>(rowStartIndex) = -pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL_WORLD_ALIGNED).topRows<3>();
     }
     
     for(size_t i = modelInternalSettings_.numThreeDofEndEffectors; i < modelInternalSettings_.numEndEffectors; ++i)

@@ -74,7 +74,7 @@ TEST(NewtonRaphsonTest, threeDofGradient)
     for(size_t i = 0; i < 4; ++i)
     {
       singleJacobian.setZero();
-      pinocchio::computeFrameJacobian(modelTrue, dataTrue, q, endEffectorIndexes[i], pinocchio::LOCAL, singleJacobian);
+      pinocchio::computeFrameJacobian(modelTrue, dataTrue, q, endEffectorIndexes[i], pinocchio::LOCAL_WORLD_ALIGNED, singleJacobian);
       jacobianTrue.block(3 * i, 0, 3, modelTrue.nv) = -singleJacobian.block(0, 0, 3, modelTrue.nv);
     }
 

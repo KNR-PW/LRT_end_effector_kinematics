@@ -46,7 +46,6 @@ namespace multi_end_effector_kinematics
       ocs2::ad_vector_t getErrorPositionsCppAd(
         ocs2::PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
         const ocs2::ad_vector_t& actualJointPositions,
-        const ocs2::ad_vector_t& endEffectorPositions,
         const ocs2::ad_vector_t& logEndEffectorTransforms);
 
       std::unique_ptr<ocs2::CppAdInterface> errorPositionsAdFunction_;

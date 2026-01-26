@@ -11,7 +11,7 @@ using namespace multi_end_effector_kinematics;
 
 
 static constexpr ocs2::scalar_t tolerance = 1e-6;
-static constexpr size_t numTests = 10;
+static constexpr size_t numTests = 100;
 
 TEST(NewtonRaphsonTestAD, threeDofGradient)
 {
@@ -56,7 +56,7 @@ TEST(NewtonRaphsonTestAD, threeDofGradient)
 
   for(int i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(modelTrue.nq);
+    Eigen::VectorXd q = Eigen::VectorXd::Random(modelTrue.nq);
     
     Eigen::Vector3d position = Eigen::Vector3d::Random() * 0.5;
 
@@ -66,9 +66,6 @@ TEST(NewtonRaphsonTestAD, threeDofGradient)
     pinocchio::forwardKinematics(modelInverse, dataInverse, q);
     Eigen::MatrixXd jacobianInverse = solver.getGradient(q, threeDofPositions, sixDofPositions);
 
-    std::cerr << "Mine: " << std::endl;
-    std::cerr << jacobianInverse << std::endl;
-    std::cerr << std::endl;
     Eigen::MatrixXd jacobianTrue(12, modelTrue.nv);
     pinocchio::Data::Matrix6x singleJacobian(6, modelTrue.nv);
 
@@ -77,16 +74,10 @@ TEST(NewtonRaphsonTestAD, threeDofGradient)
     for(size_t i = 0; i < 4; ++i)
     {
       singleJacobian.setZero();
-      pinocchio::computeFrameJacobian(modelTrue, dataTrue, q, endEffectorIndexes[i], pinocchio::LOCAL, singleJacobian);
+      pinocchio::computeFrameJacobian(modelTrue, dataTrue, q, endEffectorIndexes[i], pinocchio::LOCAL_WORLD_ALIGNED, singleJacobian);
       jacobianTrue.block(3 * i, 0, 3, modelTrue.nv) = -singleJacobian.block(0, 0, 3, modelTrue.nv);
     }
-    std::cerr << "True: " << std::endl;
-    std::cerr << jacobianTrue << std::endl;
-    std::cerr << std::endl;
 
-    std::cerr << "Roznica: " << std::endl;
-    std::cerr << jacobianTrue - jacobianInverse << std::endl;
-    std::cerr << std::endl;
     EXPECT_TRUE(jacobianTrue.isApprox(jacobianInverse, tolerance));
   }
 }

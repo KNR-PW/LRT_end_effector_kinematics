@@ -44,7 +44,7 @@ add_library(${PROJECT_NAME}
   src/solvers/InverseSolverInterface.cpp
   src/solvers/gradient_based/GradientBasedSolver.cpp
   src/solvers/gradient_based/NewtonRaphson.cpp
-  # src/solvers/gradient_based/NewtonRaphsonAD.cpp
+  src/solvers/gradient_based/NewtonRaphsonAD.cpp
   src/MultiEndEffectorKinematics.cpp
 )
 
@@ -122,6 +122,7 @@ if(BUILD_TESTING)
 
   ament_add_gtest(${PROJECT_NAME}_test
             test/NewtonRaphsonTest.cpp
+            test/NewtonRaphsonADTest.cpp
             test/MultEndEffectorKinematicsTest.cpp
             
   )
@@ -132,7 +133,9 @@ if(BUILD_TESTING)
 
   if(ACTIVE_BENCHMARKS)
     find_package(ament_cmake_google_benchmark REQUIRED)
-    ament_add_google_benchmark(${PROJECT_NAME}_benchmark benchmarks/NewtonRaphsonBenchmark.cpp)
+    ament_add_google_benchmark(${PROJECT_NAME}_benchmark 
+        benchmarks/NewtonRaphsonsBenchmark.cpp
+    )
     target_include_directories(${PROJECT_NAME}_benchmark PRIVATE benchmarks/include)
     target_link_libraries(${PROJECT_NAME}_benchmark ${PROJECT_NAME})
     target_compile_options(${PROJECT_NAME}_benchmark PUBLIC ${FLAGS})
