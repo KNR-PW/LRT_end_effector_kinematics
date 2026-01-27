@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonSolverAD.hpp>
+#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonAD.hpp>
 #include <multi_end_effector_kinematics/../../test/include/MultiEndEffectorKinematicsTest.hpp>
 #include <multi_end_effector_kinematics/path_management/package_path.h>
 
@@ -37,7 +37,7 @@ TEST(NewtonRaphsonTestAD, threeDofGradient)
 
   ocs2::PinocchioInterface pinocchioInterface = kinematicsTest.getPinocchioInterface();
   const auto modelInternalSettings = kinematicsTest.getModelInternalSettings();
-  multi_end_effector_kinematics::NewtonRaphsonSolverAD solver(pinocchioInterface, modelInternalSettings, solverSettings);
+  multi_end_effector_kinematics::NewtonRaphsonAD solver(pinocchioInterface, modelInternalSettings, solverSettings);
 
   const pinocchio::Model& modelInverse = pinocchioInterface.getModel();
   pinocchio::Data& dataInverse = pinocchioInterface.getData();
@@ -102,7 +102,7 @@ TEST(NewtonRaphsonTestAD, SixDofGradient)
 
   ocs2::PinocchioInterface pinocchioInterface = kinematicsTest.getPinocchioInterface();
   const auto modelInternalSettings = kinematicsTest.getModelInternalSettings();
-  multi_end_effector_kinematics::NewtonRaphsonSolverAD solver(pinocchioInterface, modelInternalSettings, solverSettings);
+  multi_end_effector_kinematics::NewtonRaphsonAD solver(pinocchioInterface, modelInternalSettings, solverSettings);
 
   const pinocchio::Model& modelInverse = pinocchioInterface.getModel();
   pinocchio::Data& dataInverse = pinocchioInterface.getData();

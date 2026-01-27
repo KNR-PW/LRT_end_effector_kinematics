@@ -1,4 +1,4 @@
-#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonSolverAD.hpp>
+#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonAD.hpp>
 
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/codegen/cppadcg.hpp>
@@ -11,7 +11,7 @@
 namespace multi_end_effector_kinematics
 {
   using namespace ocs2;
-  NewtonRaphsonSolverAD::NewtonRaphsonSolverAD(PinocchioInterface& pinocchioInterface,
+  NewtonRaphsonAD::NewtonRaphsonAD(PinocchioInterface& pinocchioInterface,
     const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings): 
       GradientBasedSolver(pinocchioInterface, modelInternalSettings, solverSettings)
   {
@@ -28,8 +28,8 @@ namespace multi_end_effector_kinematics
       // initialize CppAD interface
       auto pinocchioInterfaceCppAd = pinocchioInterface.toCppAd();
   
-      const ad_vector_t actualJointPositions = x;
-      const ad_vector_t logEndEffectorTransforms = p;
+      const ad_vector_t& actualJointPositions = x;
+      const ad_vector_t& logEndEffectorTransforms = p;
       y = getErrorPositionsCppAd(pinocchioInterfaceCppAd, actualJointPositions, 
         logEndEffectorTransforms);
     };
@@ -40,7 +40,7 @@ namespace multi_end_effector_kinematics
     errorPositionsAdFunction_->createModels(CppAdInterface::ApproximationOrder::First, false);
   }
 
-  Eigen::MatrixXd NewtonRaphsonSolverAD::getGradient(const Eigen::VectorXd& actualJointPositions,
+  Eigen::MatrixXd NewtonRaphsonAD::getGradient(const Eigen::VectorXd& actualJointPositions,
     const std::vector<Eigen::Vector3d>& endEffectorPositions,
     const std::vector<pinocchio::SE3>& endEffectorTransforms)
   {
@@ -54,17 +54,17 @@ namespace multi_end_effector_kinematics
       positons.middleRows<6>(rowStartIndex) = pinocchio::log6(endEffectorTransforms[i]).toVector();
     }
 
-    Eigen::MatrixXd gradient = errorPositionsAdFunction_->getJacobian(
+    const Eigen::MatrixXd gradient = errorPositionsAdFunction_->getJacobian(
       actualJointPositions, positons);
     return gradient;
   }
 
-  const std::string& NewtonRaphsonSolverAD::getSolverName()
+  const std::string& NewtonRaphsonAD::getSolverName()
   {
     return solverName_;
   }
 
-  ad_vector_t NewtonRaphsonSolverAD::getErrorPositionsCppAd(
+  ad_vector_t NewtonRaphsonAD::getErrorPositionsCppAd(
     PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
     const ad_vector_t& actualJointPositions,
     const ad_vector_t& logEndEffectorTransforms)

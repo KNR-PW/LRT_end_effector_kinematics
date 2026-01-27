@@ -1,15 +1,15 @@
-#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonSolver.hpp>
+#include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphson.hpp>
 
 namespace multi_end_effector_kinematics
 {
-  NewtonRaphsonSolver::NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
+  NewtonRaphson::NewtonRaphson(ocs2::PinocchioInterface& pinocchioInterface,
     const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings): 
       GradientBasedSolver(pinocchioInterface, modelInternalSettings, solverSettings)
   {
     solverName_ = "NewtonRaphson";
   }
 
-  Eigen::MatrixXd NewtonRaphsonSolver::getGradient(const Eigen::VectorXd& actualJointPositions,
+  Eigen::MatrixXd NewtonRaphson::getGradient(const Eigen::VectorXd& actualJointPositions,
     const std::vector<Eigen::Vector3d>& endEffectorPositions,
     const std::vector<pinocchio::SE3>& endEffectorTransforms)
   {
@@ -42,7 +42,7 @@ namespace multi_end_effector_kinematics
     return gradient;
   }
 
-  const std::string& NewtonRaphsonSolver::getSolverName()
+  const std::string& NewtonRaphson::getSolverName()
   {
     return solverName_;
   }

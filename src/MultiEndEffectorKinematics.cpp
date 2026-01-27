@@ -711,11 +711,15 @@ namespace multi_end_effector_kinematics
     std::unique_ptr<InverseSolverInterface> solverPtr;
     if(solverName == "NewtonRaphson")
     {
-      solverPtr.reset(new NewtonRaphsonSolver(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
+      solverPtr.reset(new NewtonRaphson(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
     }
     else if(solverName == "NewtonRaphsonAD")
     {
-      solverPtr.reset(new NewtonRaphsonSolverAD(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
+      solverPtr.reset(new NewtonRaphsonAD(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
+    }
+    else if(solverName == "QuIK")
+    {
+      solverPtr.reset(new QuIK(*pinocchioInterface_, modelInternalSettings_, solverSettings_));
     }
     else
     {

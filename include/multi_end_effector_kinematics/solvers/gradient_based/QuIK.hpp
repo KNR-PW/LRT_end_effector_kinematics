@@ -17,32 +17,41 @@
  * Authors: Bartłomiej Krajewski (https://github.com/BartlomiejK2)
  */
 
-#ifndef __NEWTON_RAPHSON_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
-#define __NEWTON_RAPHSON_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
-
+#ifndef __QUIK_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
+#define __QUIK_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
 
 #include <multi_end_effector_kinematics/solvers/InverseSolverInterface.hpp>
 #include <multi_end_effector_kinematics/solvers/gradient_based/GradientBasedSolver.hpp>
 
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/spatial/explog.hpp>
+#include <ocs2_core/automatic_differentiation/CppAdInterface.h>
 
 namespace multi_end_effector_kinematics
 {
-  class NewtonRaphsonSolver: public GradientBasedSolver
+  class QuIK: public GradientBasedSolver
   {
     public:
 
-      NewtonRaphsonSolver(ocs2::PinocchioInterface& pinocchioInterface,
-        const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings);
-      
+      QuIK(ocs2::PinocchioInterface& pinocchioInterface,
+        const KinematicsInternalModelSettings& modelInternalSettings, 
+        const InverseSolverSettings& solverSettings);
+
       Eigen::MatrixXd getGradient(const Eigen::VectorXd& actualJointPositions,
         const std::vector<Eigen::Vector3d>& endEffectorPositions,
         const std::vector<pinocchio::SE3>& endEffectorTransforms) override final;
-      
+
       const std::string& getSolverName() override final;
+
+    private:
+
+      ocs2::ad_vector_t getErrorPositionsCppAd(
+        ocs2::PinocchioInterfaceCppAd& pinocchioInterfaceCppAd,
+        const ocs2::ad_vector_t& actualJointPositions,
+        const ocs2::ad_vector_t& endEffectorPositions,
+        const ocs2::ad_vector_t& logEndEffectorTransforms);
+
+      std::unique_ptr<ocs2::CppAdInterface> errorPositionsAdFunction_;
+
+      std::function<Eigen::MatrixXd(const Eigen::VectorXd&, Eigen::VectorXd&)> gradientFunction_;
   };
 };
-
 #endif
