@@ -72,10 +72,12 @@ namespace multi_end_effector_kinematics
 
   std::string ReturnStatus::toString() const
   {
-    std::string returnString = "Success: ";
-    if(success) returnString += "True\t";
-    else returnString += "No\t";
-    returnString += "Flag: " + returnFlagToString(flag);
+    std::string returnString = "\"\"Return Status\"\"\n";
+    returnString += "Success: ";
+    if(success) returnString += "True\n";
+    else returnString += "No\n";
+    returnString += "Flag: " + returnFlagToString(flag) + "\n";
+    returnString += "Iterations: " + std::to_string(iterations) +"\n";
     return returnString;
   }
 

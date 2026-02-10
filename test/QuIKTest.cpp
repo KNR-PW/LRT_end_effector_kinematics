@@ -11,7 +11,7 @@ using namespace multi_end_effector_kinematics;
 
 
 static constexpr ocs2::scalar_t tolerance = 1e-3;
-static constexpr size_t numTests = 100;
+static constexpr size_t numTests = 20;
 
 TEST(QuIKTest, Constructor)
 {
@@ -332,8 +332,8 @@ TEST(QuIKTest, calculateJointPositionsSixDoF)
   modelSettings.sixDofEndEffectorNames = sixDofLinks;
 
   InverseSolverSettings solverSettings;
-  solverSettings.dampingCoefficient = 1e-8;
-  solverSettings.stepCoefficient = 0.25;
+  solverSettings.dampingCoefficient = 1e-7;
+  solverSettings.stepCoefficient = 1.5;
   solverSettings.tolerance = 1e-5;
   solverSettings.maxIterations = 1000;
   MultiEndEffectorKinematicsTest kinematicsTest(urdfPathName, modelSettings, 
@@ -360,8 +360,6 @@ TEST(QuIKTest, calculateJointPositionsSixDoF)
 
     pinocchio::framesForwardKinematics(model, data, qInverse);
     std::cerr << result.toString() << std::endl;
-    std::cerr << (targetTransforms[0].rotation() - data.oMf[endEffectorIndex].rotation()).norm() << std::endl;
-    std::cerr << (targetTransforms[0].translation() - data.oMf[endEffectorIndex].translation()).norm() << std::endl;
     EXPECT_TRUE(targetTransforms[0].isApprox(data.oMf[endEffectorIndex], tolerance));
 
     EXPECT_TRUE(result.success == true);

@@ -112,6 +112,7 @@ namespace multi_end_effector_kinematics
   {
     bool success;
     TaskReturnFlag flag;
+    size_t iterations;
 
     std::string toString() const;
   };  

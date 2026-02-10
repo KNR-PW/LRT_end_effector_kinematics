@@ -258,6 +258,7 @@ namespace multi_end_effector_kinematics
       if(error.norm() < solverSettings_.tolerance)
       {
         returnValue.flag = TaskReturnFlag::FINISHED;
+        returnValue.iterations = iteration;
         break; // early return
       }
       
@@ -268,6 +269,7 @@ namespace multi_end_effector_kinematics
       {
         returnValue.success= false;
         returnValue.flag = TaskReturnFlag::SOLVER_ERROR;
+        returnValue.iterations = iteration;
         break; // early return
       }
       
@@ -278,6 +280,7 @@ namespace multi_end_effector_kinematics
       {
         returnValue.success= false;
         returnValue.flag = TaskReturnFlag::SMALL_STEP_SIZE;
+        returnValue.iterations = iteration;
         break; // early return
       }
 
@@ -285,6 +288,7 @@ namespace multi_end_effector_kinematics
       {
         returnValue.success = false;
         returnValue.flag = TaskReturnFlag::NEW_POSITION_OUT_OF_BOUNDS;
+        returnValue.iterations = iteration;
         break; // early return
       }
       

@@ -24,4 +24,9 @@
 #include <multi_end_effector_kinematics/solvers/gradient_based/NewtonRaphsonAD.hpp>
 #include <multi_end_effector_kinematics/solvers/gradient_based/QuIK.hpp>
 
+namespace multi_end_effector_kinematics
+{
+  const std::vector<std::string> solverNameList{"NewtonRaphson", "NewtonRaphsonAD", "QuIK"};
+} // namespace multi_end_effector_kinematics
+
 #endif
