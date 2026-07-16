@@ -37,6 +37,7 @@ find_package(Eigen3 REQUIRED)
 
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 
 set(THIS_PACKAGE_DEPENDS
@@ -92,6 +93,7 @@ target_include_directories(R6BotIkDemoNode
 ament_target_dependencies(R6BotIkDemoNode
   rclcpp
   sensor_msgs
+  visualization_msgs
   ament_index_cpp
   ${THIS_PACKAGE_DEPENDS}
 )

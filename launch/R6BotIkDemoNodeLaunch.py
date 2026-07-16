@@ -48,9 +48,11 @@ def generate_launch_description():
         parameters=[
             {
                 "solver_name": "NewtonRaphson",
+                "step_coefficient": 0.8,
                 "initial_joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,],
-                "goal_joint_positions": [0.30, -0.45, 0.55, 0.25, -0.35, 0.15,],
-                "iteration_period_ms": 1500,
+                "target_position": [-0.091895, -0.627343, 1.622792,],
+                "target_orientation_rpy": [1.044101, -0.709588, -1.391157,],
+                "iteration_period_ms": 500,
                 "max_demo_iterations": 200,
             }
         ],

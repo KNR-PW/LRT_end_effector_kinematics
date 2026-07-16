@@ -5,10 +5,13 @@
 #include <vector>
 
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <geometry_msgs/msg/point.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 
 #include <pinocchio/spatial/se3.hpp>
 
@@ -25,7 +28,9 @@ struct R6BotIkDemoSettings
   std::vector<std::string> jointNames;
 
   Eigen::VectorXd initialJointPositions;
-  Eigen::VectorXd goalJointPositions;
+
+  Eigen::Vector3d targetPosition;
+  Eigen::Vector3d targetOrientationRpy;
 
   std::chrono::milliseconds iterationPeriod;
   std::size_t maxDemoIterations;
@@ -34,7 +39,7 @@ struct R6BotIkDemoSettings
 class R6BotIkDemoNode : public rclcpp::Node
 {
 public:
-  R6BotIkDemoNode() : rclcpp::Node("r6bot_ik_demo_node"), demoIteration_(0), demoFinished_(false)
+  R6BotIkDemoNode() : rclcpp::Node("r6bot_ik_demo_node"), demoIteration_(0), initialStatePublished_(false), demoFinished_(false)
   {
     settings_ = loadSettingsFromParameters();
     validateSettings();
@@ -42,14 +47,29 @@ public:
     currentJointPositions_ = settings_.initialJointPositions;
 
     jointStatePublisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
+    markerPublisher_ = this->create_publisher<visualization_msgs::msg::Marker>("/ik_demo_markers", 10);
 
     initializeKinematics();
     initializeTargetPose();
 
-    timer_ = this->create_wall_timer(settings_.iterationPeriod,
+    timer_ = this->create_wall_timer(
+      settings_.iterationPeriod,
       [this]()
       {
-        this->runOneIkIteration();
+        if (!initialStatePublished_) {
+          publishJointState();
+          appendCurrentTcpPoint();
+          publishTargetMarker();
+          publishTcpTrailMarker();
+
+          initialStatePublished_ = true;
+          return;
+        }
+
+        runOneIkIteration();
+
+        publishTargetMarker();
+        publishTcpTrailMarker();
       });
 
     RCLCPP_INFO(this->get_logger(), "R6Bot IK demo node started.");
@@ -70,10 +90,14 @@ private:
     settings.solverSettings.tolerance = 1e-5;
     settings.solverSettings.minimumStepSize = 1e-8;
     settings.solverSettings.dampingCoefficient = 1e-6;
-    settings.solverSettings.stepCoefficient = 0.8;
     settings.solverSettings.singularityThreshold = 1e-6;
 
     settings.solverName = this->declare_parameter<std::string>("solver_name", "NewtonRaphson");
+    settings.solverSettings.stepCoefficient = this->declare_parameter<double>("step_coefficient", 0.2);
+
+    if (settings.solverSettings.stepCoefficient <= 0.0 || settings.solverSettings.stepCoefficient > 1.0) {
+      throw std::invalid_argument("step_coefficient must be greater than 0.0 and not greater than 1.0.");
+    }
 
     settings.jointNames = {
       "joint_1",
@@ -85,15 +109,27 @@ private:
     };
 
     const auto initialJointPositions = this->declare_parameter<std::vector<double>>(
-        "initial_joint_positions", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+      "initial_joint_positions", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
 
-    const auto goalJointPositions = this->declare_parameter<std::vector<double>>(
-        "goal_joint_positions", {0.30, -0.45, 0.55, 0.25, -0.35, 0.15});
+    const auto targetPosition = this->declare_parameter<std::vector<double>>(
+      "target_position", {-0.091895, -0.627343, 1.622792});
 
-    settings.initialJointPositions = Eigen::Map<const Eigen::VectorXd>(initialJointPositions.data(), static_cast<Eigen::Index>(initialJointPositions.size()));
+    const auto targetOrientationRpy = this->declare_parameter<std::vector<double>>(
+      "target_orientation_rpy", {1.044101, -0.709588, -1.391157});
 
-    settings.goalJointPositions =
-      Eigen::Map<const Eigen::VectorXd>(goalJointPositions.data(), static_cast<Eigen::Index>(goalJointPositions.size()));
+    if (targetPosition.size() != 3) {
+      throw std::invalid_argument("target_position must contain exactly 3 values: x, y, z.");
+    }
+
+    if (targetOrientationRpy.size() != 3) {
+      throw std::invalid_argument("target_orientation_rpy must contain exactly 3 values: roll, pitch, yaw.");
+    }
+
+    settings.targetPosition = Eigen::Vector3d(targetPosition[0], targetPosition[1], targetPosition[2]);
+    settings.targetOrientationRpy = Eigen::Vector3d(targetOrientationRpy[0], targetOrientationRpy[1], targetOrientationRpy[2]);
+
+    settings.initialJointPositions = Eigen::Map<const Eigen::VectorXd>(
+      initialJointPositions.data(), static_cast<Eigen::Index>(initialJointPositions.size()));
 
     const int iterationPeriodMs = this->declare_parameter<int>("iteration_period_ms", 100);
 
@@ -126,8 +162,12 @@ private:
       throw std::invalid_argument("initial_joint_positions size must match the number of r6bot joints.");
     }
 
-    if (static_cast<std::size_t>(settings_.goalJointPositions.size()) != expectedNumberOfJoints) {
-      throw std::invalid_argument("goal_joint_positions size must match the number of r6bot joints.");
+    if (!settings_.targetPosition.allFinite()) {
+      throw std::invalid_argument("target_position must contain only finite values.");
+    }
+
+    if (!settings_.targetOrientationRpy.allFinite()) {
+      throw std::invalid_argument("target_orientation_rpy must contain only finite values.");
     }
 
     if (settings_.solverName.empty()) {
@@ -146,22 +186,51 @@ private:
   void initializeKinematics()
   {
     kinematics_ = std::make_unique<multi_end_effector_kinematics::MultiEndEffectorKinematics>(
-        getR6BotUrdfPath(), settings_.modelSettings, settings_.solverSettings, settings_.solverName);
+      getR6BotUrdfPath(), settings_.modelSettings, settings_.solverSettings, settings_.solverName);
 
     RCLCPP_INFO(this->get_logger(), "Kinematics object initialized.");
   }
 
   void initializeTargetPose()
   {
-    targetEndEffectorPoses_.assign(settings_.modelSettings.sixDofEndEffectorNames.size(), pinocchio::SE3::Identity());
+    const double roll = settings_.targetOrientationRpy.x();
+    const double pitch = settings_.targetOrientationRpy.y();
+    const double yaw = settings_.targetOrientationRpy.z();
 
-    const auto fkStatus = kinematics_->calculateEndEffectorPoses(settings_.goalJointPositions, targetEndEffectorPoses_);
+    const Eigen::Matrix3d targetRotation = (
+      Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) *
+      Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
+      Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX())).toRotationMatrix();
+
+    targetEndEffectorPoses_.assign(settings_.modelSettings.sixDofEndEffectorNames.size(), pinocchio::SE3::Identity());
+    targetEndEffectorPoses_.front() = pinocchio::SE3(targetRotation, settings_.targetPosition);
+
+    RCLCPP_INFO(this->get_logger(), "Target TCP position: [%.6f, %.6f, %.6f]",
+      settings_.targetPosition.x(), settings_.targetPosition.y(), settings_.targetPosition.z());
+
+    RCLCPP_INFO(this->get_logger(), "Target TCP RPY: [%.6f, %.6f, %.6f]", roll, pitch, yaw);
+  }
+
+  void appendCurrentTcpPoint()
+  {
+    std::vector<pinocchio::SE3> currentEndEffectorPoses(
+      settings_.modelSettings.sixDofEndEffectorNames.size(), pinocchio::SE3::Identity());
+
+    const auto fkStatus = kinematics_->calculateEndEffectorPoses(currentJointPositions_, currentEndEffectorPoses);
 
     if (!fkStatus.success) {
-      throw std::runtime_error("Failed to compute FK for goal_joint_positions: " + fkStatus.toString());
+      RCLCPP_ERROR(this->get_logger(), "Failed to calculate current TCP pose: %s", fkStatus.toString().c_str());
+      return;
     }
 
-    RCLCPP_INFO(this->get_logger(), "Target end-effector pose initialized from FK(goal_joint_positions).");
+    const auto & tcpPosition = currentEndEffectorPoses.front().translation();
+
+    geometry_msgs::msg::Point point;
+    point.x = tcpPosition.x();
+    point.y = tcpPosition.y();
+    point.z = tcpPosition.z();
+
+    tcpTrailPoints_.push_back(point);
   }
 
   std::string getR6BotUrdfPath() const
@@ -209,9 +278,10 @@ private:
     currentJointPositions_ += jointDelta;
     ++demoIteration_;
 
+    appendCurrentTcpPoint();
+
     if (demoIteration_ >= settings_.maxDemoIterations) {
       RCLCPP_WARN(this->get_logger(), "IK demo reached max_demo_iterations=%zu.", settings_.maxDemoIterations);
-
       demoFinished_ = true;
     }
 
@@ -232,17 +302,81 @@ private:
     jointStatePublisher_->publish(msg);
   }
 
+  void publishTargetMarker()
+  {
+    visualization_msgs::msg::Marker marker;
+
+    marker.header.frame_id = settings_.modelSettings.baseLinkName;
+    marker.header.stamp = this->now();
+
+    marker.ns = "ik_target";
+    marker.id = 0;
+
+    marker.type = visualization_msgs::msg::Marker::SPHERE;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+
+    const auto & targetPosition = targetEndEffectorPoses_.front().translation();
+
+    marker.pose.position.x = targetPosition.x();
+    marker.pose.position.y = targetPosition.y();
+    marker.pose.position.z = targetPosition.z();
+    marker.pose.orientation.w = 1.0;
+
+    marker.scale.x = 0.6;
+    marker.scale.y = 0.6;
+    marker.scale.z = 0.6;
+
+    marker.color.r = 1.0F;
+    marker.color.g = 0.0F;
+    marker.color.b = 0.0F;
+    marker.color.a = 0.8F;
+
+    markerPublisher_->publish(marker);
+  }
+
+  void publishTcpTrailMarker()
+  {
+    visualization_msgs::msg::Marker marker;
+
+    marker.header.frame_id = settings_.modelSettings.baseLinkName;
+    marker.header.stamp = this->now();
+
+    marker.ns = "tcp_trail";
+    marker.id = 0;
+
+    marker.type = visualization_msgs::msg::Marker::SPHERE_LIST;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+
+    marker.pose.orientation.w = 1.0;
+
+    marker.scale.x = 0.03;
+    marker.scale.y = 0.03;
+    marker.scale.z = 0.03;
+
+    marker.color.r = 0.0F;
+    marker.color.g = 0.4F;
+    marker.color.b = 1.0F;
+    marker.color.a = 1.0F;
+
+    marker.points = tcpTrailPoints_;
+
+    markerPublisher_->publish(marker);
+  }
+
   R6BotIkDemoSettings settings_;
 
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr jointStatePublisher_;
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr markerPublisher_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   std::unique_ptr<multi_end_effector_kinematics::MultiEndEffectorKinematics> kinematics_;
 
   Eigen::VectorXd currentJointPositions_;
   std::vector<pinocchio::SE3> targetEndEffectorPoses_;
+  std::vector<geometry_msgs::msg::Point> tcpTrailPoints_;
 
   std::size_t demoIteration_;
+  bool initialStatePublished_;
   bool demoFinished_;
 };
 

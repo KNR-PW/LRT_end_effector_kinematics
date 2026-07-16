@@ -16,7 +16,7 @@ static constexpr size_t numTests = 100;
 TEST(NewtonRaphsonTest, threeDofGradient)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -85,7 +85,7 @@ TEST(NewtonRaphsonTest, threeDofGradient)
 TEST(NewtonRaphsonTest, SixDofGradient)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "NewtonRaphson";
