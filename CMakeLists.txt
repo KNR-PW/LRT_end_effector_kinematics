@@ -19,6 +19,25 @@ configure_file (
 ##################
 
 find_package(ament_cmake REQUIRED)
+find_package(Boost REQUIRED COMPONENTS
+  system
+  filesystem
+  serialization
+  log
+  log_setup
+  thread
+  date_time
+  regex
+  chrono
+  atomic
+)
+
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
 set(THIS_PACKAGE_DEPENDS
   ocs2_robotic_tools 
@@ -55,7 +74,34 @@ target_include_directories(${PROJECT_NAME}
         "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
 ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_DEPENDS})
+target_link_libraries(${PROJECT_NAME}
+  Eigen3::Eigen
+)
 target_compile_options(${PROJECT_NAME} PUBLIC ${OCS2_CXX_FLAGS})
+
+add_executable(R6BotIkDemoNode
+  src/R6BotIkDemoNode.cpp
+)
+
+target_include_directories(R6BotIkDemoNode
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+
+ament_target_dependencies(R6BotIkDemoNode
+  rclcpp
+  sensor_msgs
+  ament_index_cpp
+  ${THIS_PACKAGE_DEPENDS}
+)
+
+target_link_libraries(R6BotIkDemoNode
+  ${PROJECT_NAME}
+  Eigen3::Eigen
+)
+
+target_compile_options(R6BotIkDemoNode PUBLIC ${FLAGS})
 
 #########################
 ###   CLANG TOOLING   ###
@@ -84,6 +130,11 @@ install(TARGETS
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
+install(TARGETS
+  R6BotIkDemoNode
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(
   DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
@@ -92,6 +143,11 @@ install(
 install(
   DIRECTORY test/models/meldog
   DESTINATION share/${PROJECT_NAME}/models
+)
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 install(
