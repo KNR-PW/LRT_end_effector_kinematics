@@ -59,6 +59,18 @@ namespace multi_end_effector_kinematics
     std::vector<std::string> sixDofEndEffectorNames;
   };
 
+  struct KinematicGroup
+  {
+    // End effectors which have to be solved together because they share at least one DoF
+    std::vector<size_t> endEffectorIndices;
+
+    // Rows of the global task vector/Jacobian belonging to this group
+    std::vector<size_t> taskIndices;
+
+    // Velocity-space indices (columns of Jacobian) which influence this group
+    std::vector<size_t> jointVelocityIndices;
+  };
+
   struct KinematicsInternalModelSettings
   {
     // Base frame index (frame that forward and inverse kinematics are defined)
@@ -78,6 +90,12 @@ namespace multi_end_effector_kinematics
 
     // Indices of end-effector parent joints [3DOF end effectors, 6DOF end effectors]
     std::vector<size_t> endEffectorJointIndices;
+
+    // Velocity-space indices which influence each end effector [3DOF end effectors, 6DOF end effectors]
+    std::vector<std::vector<size_t>> endEffectorJointVelocityIndices;
+
+    // Independent kinematic groups. End effectors in different groups do not share active DoFs.
+    std::vector<KinematicGroup> kinematicGroups;
   };
 
 
