@@ -112,10 +112,10 @@ private:
       "initial_joint_positions", {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
 
     const auto targetPosition = this->declare_parameter<std::vector<double>>(
-      "target_position", {-0.091895, -0.627343, 1.622792});
+      "target_position", {-0.535022568872121, 0.782303548336178, 1.21886466270994});
 
     const auto targetOrientationRpy = this->declare_parameter<std::vector<double>>(
-      "target_orientation_rpy", {1.044101, -0.709588, -1.391157});
+      "target_orientation_rpy", {2.97925298910478, -1.12433897762375, 2.43916329232365});
 
     if (targetPosition.size() != 3) {
       throw std::invalid_argument("target_position must contain exactly 3 values: x, y, z.");

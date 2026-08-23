@@ -19,19 +19,8 @@ configure_file (
 ##################
 
 find_package(ament_cmake REQUIRED)
-find_package(Boost REQUIRED COMPONENTS
-  system
-  filesystem
-  serialization
-  log
-  log_setup
-  thread
-  date_time
-  regex
-  chrono
-  atomic
-)
 
+find_package(Boost REQUIRED COMPONENTS system log log_setup)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -75,9 +64,6 @@ target_include_directories(${PROJECT_NAME}
         "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
 ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_DEPENDS})
-target_link_libraries(${PROJECT_NAME}
-  Eigen3::Eigen
-)
 target_compile_options(${PROJECT_NAME} PUBLIC ${OCS2_CXX_FLAGS})
 
 add_executable(R6BotIkDemoNode
@@ -100,7 +86,6 @@ ament_target_dependencies(R6BotIkDemoNode
 
 target_link_libraries(R6BotIkDemoNode
   ${PROJECT_NAME}
-  Eigen3::Eigen
 )
 
 target_compile_options(R6BotIkDemoNode PUBLIC ${FLAGS})

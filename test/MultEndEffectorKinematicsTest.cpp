@@ -518,6 +518,79 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesSixDoF)
   }
 }
 
+TEST(MultEndEffectorKinematicsTest, PrintReachableR6BotTarget)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd targetJointPositions(6);
+  targetJointPositions << 0.3, -0.4, 0.5, -0.2, 0.35, -0.25;
+
+  std::vector<pinocchio::SE3> targetPoses(1, pinocchio::SE3::Identity());
+
+  const auto fkStatus = kinematics.calculateEndEffectorPoses(targetJointPositions, targetPoses);
+  ASSERT_TRUE(fkStatus.success) << fkStatus.toString();
+
+  const Eigen::Vector3d rpy = targetPoses.front().rotation().eulerAngles(2, 1, 0);
+
+  std::cout << std::setprecision(15);
+  std::cout << "Target position: " << targetPoses.front().translation().transpose() << std::endl;
+  std::cout << "Yaw pitch roll: " << rpy.transpose() << std::endl;
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotConvergesToReachablePose)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  solverSettings.dampingCoefficient = 1e-6;
+  solverSettings.stepCoefficient = 0.2;
+  solverSettings.tolerance = 1e-5;
+  solverSettings.minimumStepSize = 1e-8;
+  solverSettings.singularityThreshold = 1e-6;
+  solverSettings.maxIterations = 1000;
+
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd targetJointPositions(6);
+  targetJointPositions << 0.3, -0.4, 0.5, -0.2, 0.35, -0.25;
+
+  std::vector<pinocchio::SE3> targetPoses(1, pinocchio::SE3::Identity());
+
+  const auto targetFkStatus = kinematics.calculateEndEffectorPoses(targetJointPositions, targetPoses);
+  ASSERT_TRUE(targetFkStatus.success) << targetFkStatus.toString();
+
+  const Eigen::VectorXd initialJointPositions = Eigen::VectorXd::Zero(6);
+
+  Eigen::VectorXd solvedJointPositions;
+
+  const auto ikStatus = kinematics.calculateJointPositions(initialJointPositions, targetPoses, solvedJointPositions);
+
+  ASSERT_TRUE(ikStatus.success) << ikStatus.toString();
+  EXPECT_EQ(ikStatus.flag, TaskReturnFlag::FINISHED) << ikStatus.toString();
+
+  std::vector<pinocchio::SE3> achievedPoses(1, pinocchio::SE3::Identity());
+
+  const auto achievedFkStatus = kinematics.calculateEndEffectorPoses(solvedJointPositions, achievedPoses);
+  ASSERT_TRUE(achievedFkStatus.success) << achievedFkStatus.toString();
+
+  EXPECT_TRUE(achievedPoses.front().translation().isApprox(targetPoses.front().translation(), tolerance));
+  EXPECT_TRUE(achievedPoses.front().rotation().isApprox(targetPoses.front().rotation(), tolerance));
+}
+
 TEST(MultEndEffectorKinematicsTest, R6BotConvergesToConfiguredTargetPose)
 {
   std::string urdfPathName = package_path::getPath();
@@ -537,11 +610,11 @@ TEST(MultEndEffectorKinematicsTest, R6BotConvergesToConfiguredTargetPose)
 
   MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
 
-  const Eigen::Vector3d targetPosition(-0.091895, -0.627343, 1.622792);
+  const Eigen::Vector3d targetPosition(-0.535022568872121, 0.782303548336178, 1.21886466270994);
 
-  const double roll = 1.044101;
-  const double pitch = -0.709588;
-  const double yaw = -1.391157;
+  const double roll = 2.97925298910478;
+  const double pitch = -1.12433897762375;
+  const double yaw = 2.43916329232365;
 
   const Eigen::Matrix3d targetRotation =
     (
@@ -566,10 +639,60 @@ TEST(MultEndEffectorKinematicsTest, R6BotConvergesToConfiguredTargetPose)
   std::vector<pinocchio::SE3> achievedPoses(1, pinocchio::SE3::Identity());
 
   const auto fkStatus = kinematics.calculateEndEffectorPoses(solvedJointPositions, achievedPoses);
+  
+  const double positionError = (achievedPoses.front().translation() - targetPoses.front().translation()).norm();
+  const pinocchio::SE3 poseError = achievedPoses.front().actInv(targetPoses.front());
+  const double poseErrorNorm = pinocchio::log6(poseError).toVector().norm();
 
   ASSERT_TRUE(fkStatus.success) << fkStatus.toString();
 
   EXPECT_TRUE(achievedPoses.front().translation().isApprox(targetPoses.front().translation(), tolerance));
 
   EXPECT_TRUE(achievedPoses.front().rotation().isApprox(targetPoses.front().rotation(), tolerance));
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotRejectsJointPositionsOutsideLimits)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd jointPositions = Eigen::VectorXd::Zero(6);
+  jointPositions[0] = 4.0;
+
+  std::vector<pinocchio::SE3> endEffectorPoses;
+
+  const auto status = kinematics.calculateEndEffectorPoses(jointPositions, endEffectorPoses);
+
+  EXPECT_FALSE(status.success);
+  EXPECT_EQ(status.flag, TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS);
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotRejectsJointPositionsBelowLimits)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd jointPositions = Eigen::VectorXd::Zero(6);
+  jointPositions[0] = -4.0;
+
+  std::vector<pinocchio::SE3> endEffectorPoses;
+
+  const auto status = kinematics.calculateEndEffectorPoses(jointPositions, endEffectorPoses);
+
+  EXPECT_FALSE(status.success);
+  EXPECT_EQ(status.flag, TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS);
 }

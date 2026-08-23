@@ -16,7 +16,7 @@ namespace multi_end_effector_kinematics
     {
       if(group.taskIndices.size() > group.jointVelocityIndices.size())
       {
-        throw std::logic_error("InverseSolverInterface: Kinematic group is overconstrained, not supported!");
+        throw std::logic_error("InverseSolverInterface: Kinematic group has fewer DoFs than task dimensions, not supported!");
       }
 
       jointDofDim += group.jointVelocityIndices.size();
@@ -50,8 +50,7 @@ namespace multi_end_effector_kinematics
     }
     else
     {
-      throw std::logic_error("InverseSolverInterface: Task is overconstrained, "
-        "not supported!");
+      throw std::logic_error("InverseSolverInterface: Task has fewer available DoFs than task dimensions, not supported!");
     }
   }
 

@@ -336,7 +336,7 @@ namespace multi_end_effector_kinematics
 
     assert(actualJointPositions.rows() == model.nq);
     
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
+    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS, 0};
 
     if(!checkPositionBounds(actualJointPositions))
     {
@@ -391,6 +391,11 @@ namespace multi_end_effector_kinematics
       }
       
       iteration++;
+    }
+
+    if(returnValue.flag == TaskReturnFlag::IN_PROGRESS)
+    {
+      returnValue.iterations = iteration;
     }
     
     return returnValue;
@@ -725,8 +730,10 @@ namespace multi_end_effector_kinematics
 
     for(size_t i = 0; i < jointNumber; ++i)
     {
-      if(newJointPositions[i] > model.upperPositionLimit[i] && 
-        newJointPositions[i] < model.lowerPositionLimit[i]) return false;
+      if(newJointPositions[i] > model.upperPositionLimit[i] || newJointPositions[i] < model.lowerPositionLimit[i])
+      {
+        return false;
+      }
     }
 
     return true;
