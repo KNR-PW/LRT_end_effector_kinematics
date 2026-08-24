@@ -7,16 +7,109 @@
 
 #include <Eigen/Geometry>
 
-using namespace multi_end_effector_kinematics;
+#include <algorithm>
 
+using namespace multi_end_effector_kinematics;
 
 static constexpr ocs2::scalar_t tolerance = 1e-6;
 static constexpr size_t numTests = 100;
 
+TEST(NewtonRaphsonTest, MeldogKinematicGroups)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "trunk_link";
+  modelSettings.threeDofEndEffectorNames = {"RFF_link", "RRF_link", "LFF_link", "LRF_link"};
+
+  InverseSolverSettings solverSettings;
+  MultiEndEffectorKinematicsTest kinematicsTest(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  const auto& model = kinematicsTest.getPinocchioInterface().getModel();
+  const auto& modelInternalSettings = kinematicsTest.getModelInternalSettings();
+
+  const auto getVelocityIndices = [&](const std::vector<std::string>& jointNames)
+  {
+    std::vector<size_t> velocityIndices;
+
+    for(const auto& jointName : jointNames)
+    {
+      const size_t jointIndex = model.getJointId(jointName);
+      const auto& jointModel = model.joints[jointIndex];
+
+      for(int i = 0; i < jointModel.nv(); ++i)
+      {
+        velocityIndices.push_back(static_cast<size_t>(jointModel.idx_v() + i));
+      }
+    }
+
+    std::sort(velocityIndices.begin(), velocityIndices.end());
+    return velocityIndices;
+  };
+
+  const std::vector<std::vector<size_t>> expectedVelocityIndices{
+    getVelocityIndices({"RFT_joint", "RFH_joint", "RFK_joint"}),
+    getVelocityIndices({"RRT_joint", "RRH_joint", "RRK_joint"}),
+    getVelocityIndices({"LFT_joint", "LFH_joint", "LFK_joint"}),
+    getVelocityIndices({"LRT_joint", "LRH_joint", "LRK_joint"})
+  };
+
+  ASSERT_EQ(modelInternalSettings.endEffectorJointVelocityIndices.size(), 4);
+  ASSERT_EQ(modelInternalSettings.kinematicGroups.size(), 4);
+
+  for(size_t i = 0; i < 4; ++i)
+  {
+    EXPECT_EQ(modelInternalSettings.endEffectorJointVelocityIndices[i], expectedVelocityIndices[i]);
+    EXPECT_EQ(modelInternalSettings.kinematicGroups[i].endEffectorIndices, std::vector<size_t>{i});
+    EXPECT_EQ(modelInternalSettings.kinematicGroups[i].jointVelocityIndices, expectedVelocityIndices[i]);
+    EXPECT_EQ(modelInternalSettings.kinematicGroups[i].taskIndices, (std::vector<size_t>{3 * i, 3 * i + 1, 3 * i + 2}));
+  }
+}
+
+TEST(NewtonRaphsonTest, R6BotKinematicGroup)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  MultiEndEffectorKinematicsTest kinematicsTest(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  const auto& model = kinematicsTest.getPinocchioInterface().getModel();
+  const auto& modelInternalSettings = kinematicsTest.getModelInternalSettings();
+
+  std::vector<size_t> expectedVelocityIndices;
+
+  for(const auto& jointName : std::vector<std::string>{"joint_1", "joint_2", "joint_3", "joint_4", "joint_5", "joint_6"})
+  {
+    const size_t jointIndex = model.getJointId(jointName);
+    const auto& jointModel = model.joints[jointIndex];
+
+    for(int i = 0; i < jointModel.nv(); ++i)
+    {
+      expectedVelocityIndices.push_back(static_cast<size_t>(jointModel.idx_v() + i));
+    }
+  }
+
+  std::sort(expectedVelocityIndices.begin(), expectedVelocityIndices.end());
+
+  ASSERT_EQ(modelInternalSettings.endEffectorJointVelocityIndices.size(), 1);
+  ASSERT_EQ(modelInternalSettings.kinematicGroups.size(), 1);
+
+  EXPECT_EQ(modelInternalSettings.endEffectorJointVelocityIndices[0], expectedVelocityIndices);
+  EXPECT_EQ(modelInternalSettings.kinematicGroups[0].endEffectorIndices, std::vector<size_t>{0});
+  EXPECT_EQ(modelInternalSettings.kinematicGroups[0].jointVelocityIndices, expectedVelocityIndices);
+  EXPECT_EQ(modelInternalSettings.kinematicGroups[0].taskIndices, (std::vector<size_t>{0, 1, 2, 3, 4, 5}));
+}
+
 TEST(NewtonRaphsonTest, threeDofGradient)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -85,7 +178,7 @@ TEST(NewtonRaphsonTest, threeDofGradient)
 TEST(NewtonRaphsonTest, SixDofGradient)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "NewtonRaphson";

@@ -20,8 +20,6 @@
 #ifndef __GRADIENT_BASED_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
 #define __GRADIENT_BASED_SOLVER_MULTI_END_EFFECTOR_KINEMATICS__
 
-#include <functional>
-
 #include <Eigen/Dense>
 
 #include <multi_end_effector_kinematics/solvers/InverseSolverInterface.hpp>
@@ -97,11 +95,9 @@ namespace multi_end_effector_kinematics
 
     private:
 
-    std::function<void(const Eigen::MatrixXd&,
-      const Eigen::VectorXd&, Eigen::VectorXd&)> jointDeltasFunction_;
+    bool solveJointDeltas(const Eigen::MatrixXd& gradient, const Eigen::VectorXd& error, Eigen::VectorXd& jointDeltas) const;
 
-    std::function<void(const Eigen::MatrixXd&,
-      const Eigen::VectorXd&, Eigen::VectorXd&)> jointVelocityFunction_;
+    bool solveJointVelocities(const Eigen::MatrixXd& jacobian, const Eigen::VectorXd& endEffectorVelocity, Eigen::VectorXd& jointVelocity) const;
   };
 };
 

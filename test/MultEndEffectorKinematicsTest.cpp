@@ -16,7 +16,7 @@ static constexpr size_t numTests = 100;
 TEST(MultEndEffectorKinematicsTest, Constructor)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -47,7 +47,7 @@ TEST(MultEndEffectorKinematicsTest, Constructor)
     solverSettings, solverName), std::invalid_argument);
 
   urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   modelSettings.threeDofEndEffectorNames[0] = "aaaa";
   EXPECT_THROW(MultiEndEffectorKinematics(urdfPathName, modelSettings, 
@@ -59,7 +59,7 @@ TEST(MultEndEffectorKinematicsTest, Constructor)
 TEST(MultEndEffectorKinematicsTest, calculateJointPositionsThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -124,7 +124,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointPositionsThreeDoF)
 TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -192,7 +192,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesThreeDoF)
 TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -258,7 +258,7 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesThreeDoF)
 TEST(MultEndEffectorKinematicsTest, calculateEndEffectorPosesThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -320,7 +320,7 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorPosesThreeDoF)
 TEST(MultEndEffectorKinematicsTest, calculateJointPositionsSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "NewtonRaphson";
@@ -369,7 +369,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointPositionsSixDoF)
 TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "NewtonRaphson";
@@ -422,7 +422,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesSixDoF)
 TEST(MultEndEffectorKinematicsTest, calculateEndEffectorPosesSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "NewtonRaphson";
@@ -471,7 +471,7 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorPosesSixDoF)
 TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "NewtonRaphson";
@@ -516,4 +516,183 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesSixDoF)
     EXPECT_TRUE(result.success == true);
     EXPECT_TRUE(result.flag == TaskReturnFlag::FINISHED);
   }
+}
+
+TEST(MultEndEffectorKinematicsTest, PrintReachableR6BotTarget)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd targetJointPositions(6);
+  targetJointPositions << 0.3, -0.4, 0.5, -0.2, 0.35, -0.25;
+
+  std::vector<pinocchio::SE3> targetPoses(1, pinocchio::SE3::Identity());
+
+  const auto fkStatus = kinematics.calculateEndEffectorPoses(targetJointPositions, targetPoses);
+  ASSERT_TRUE(fkStatus.success) << fkStatus.toString();
+
+  const Eigen::Vector3d rpy = targetPoses.front().rotation().eulerAngles(2, 1, 0);
+
+  std::cout << std::setprecision(15);
+  std::cout << "Target position: " << targetPoses.front().translation().transpose() << std::endl;
+  std::cout << "Yaw pitch roll: " << rpy.transpose() << std::endl;
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotConvergesToReachablePose)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  solverSettings.dampingCoefficient = 1e-6;
+  solverSettings.stepCoefficient = 0.2;
+  solverSettings.tolerance = 1e-5;
+  solverSettings.minimumStepSize = 1e-8;
+  solverSettings.singularityThreshold = 1e-6;
+  solverSettings.maxIterations = 1000;
+
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd targetJointPositions(6);
+  targetJointPositions << 0.3, -0.4, 0.5, -0.2, 0.35, -0.25;
+
+  std::vector<pinocchio::SE3> targetPoses(1, pinocchio::SE3::Identity());
+
+  const auto targetFkStatus = kinematics.calculateEndEffectorPoses(targetJointPositions, targetPoses);
+  ASSERT_TRUE(targetFkStatus.success) << targetFkStatus.toString();
+
+  const Eigen::VectorXd initialJointPositions = Eigen::VectorXd::Zero(6);
+
+  Eigen::VectorXd solvedJointPositions;
+
+  const auto ikStatus = kinematics.calculateJointPositions(initialJointPositions, targetPoses, solvedJointPositions);
+
+  ASSERT_TRUE(ikStatus.success) << ikStatus.toString();
+  EXPECT_EQ(ikStatus.flag, TaskReturnFlag::FINISHED) << ikStatus.toString();
+
+  std::vector<pinocchio::SE3> achievedPoses(1, pinocchio::SE3::Identity());
+
+  const auto achievedFkStatus = kinematics.calculateEndEffectorPoses(solvedJointPositions, achievedPoses);
+  ASSERT_TRUE(achievedFkStatus.success) << achievedFkStatus.toString();
+
+  EXPECT_TRUE(achievedPoses.front().translation().isApprox(targetPoses.front().translation(), tolerance));
+  EXPECT_TRUE(achievedPoses.front().rotation().isApprox(targetPoses.front().rotation(), tolerance));
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotConvergesToConfiguredTargetPose)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  solverSettings.dampingCoefficient = 1e-6;
+  solverSettings.stepCoefficient = 0.2;
+  solverSettings.tolerance = 1e-5;
+  solverSettings.minimumStepSize = 1e-8;
+  solverSettings.singularityThreshold = 1e-6;
+  solverSettings.maxIterations = 1000;
+
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  const Eigen::Vector3d targetPosition(-0.535022568872121, 0.782303548336178, 1.21886466270994);
+
+  const double roll = 2.97925298910478;
+  const double pitch = -1.12433897762375;
+  const double yaw = 2.43916329232365;
+
+  const Eigen::Matrix3d targetRotation =
+    (
+      Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) *
+      Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
+      Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX())
+    ).toRotationMatrix();
+
+  const std::vector<pinocchio::SE3> targetPoses{
+    pinocchio::SE3(targetRotation, targetPosition)
+  };
+
+  const Eigen::VectorXd initialJointPositions = Eigen::VectorXd::Zero(6);
+
+  Eigen::VectorXd solvedJointPositions;
+
+  const auto ikStatus = kinematics.calculateJointPositions(initialJointPositions, targetPoses, solvedJointPositions);
+
+  ASSERT_TRUE(ikStatus.success) << ikStatus.toString();
+  EXPECT_EQ(ikStatus.flag, TaskReturnFlag::FINISHED);
+
+  std::vector<pinocchio::SE3> achievedPoses(1, pinocchio::SE3::Identity());
+
+  const auto fkStatus = kinematics.calculateEndEffectorPoses(solvedJointPositions, achievedPoses);
+  
+  const double positionError = (achievedPoses.front().translation() - targetPoses.front().translation()).norm();
+  const pinocchio::SE3 poseError = achievedPoses.front().actInv(targetPoses.front());
+  const double poseErrorNorm = pinocchio::log6(poseError).toVector().norm();
+
+  ASSERT_TRUE(fkStatus.success) << fkStatus.toString();
+
+  EXPECT_TRUE(achievedPoses.front().translation().isApprox(targetPoses.front().translation(), tolerance));
+
+  EXPECT_TRUE(achievedPoses.front().rotation().isApprox(targetPoses.front().rotation(), tolerance));
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotRejectsJointPositionsOutsideLimits)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd jointPositions = Eigen::VectorXd::Zero(6);
+  jointPositions[0] = 4.0;
+
+  std::vector<pinocchio::SE3> endEffectorPoses;
+
+  const auto status = kinematics.calculateEndEffectorPoses(jointPositions, endEffectorPoses);
+
+  EXPECT_FALSE(status.success);
+  EXPECT_EQ(status.flag, TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS);
+}
+
+TEST(MultEndEffectorKinematicsTest, R6BotRejectsJointPositionsBelowLimits)
+{
+  std::string urdfPathName = package_path::getPath();
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
+
+  KinematicsModelSettings modelSettings;
+  modelSettings.baseLinkName = "world";
+  modelSettings.sixDofEndEffectorNames = {"tool0"};
+
+  InverseSolverSettings solverSettings;
+  MultiEndEffectorKinematicsTest kinematics(urdfPathName, modelSettings, solverSettings, "NewtonRaphson");
+
+  Eigen::VectorXd jointPositions = Eigen::VectorXd::Zero(6);
+  jointPositions[0] = -4.0;
+
+  std::vector<pinocchio::SE3> endEffectorPoses;
+
+  const auto status = kinematics.calculateEndEffectorPoses(jointPositions, endEffectorPoses);
+
+  EXPECT_FALSE(status.success);
+  EXPECT_EQ(status.flag, TaskReturnFlag::CURRENT_POSITION_OUT_OF_BOUNDS);
 }
