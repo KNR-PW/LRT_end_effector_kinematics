@@ -90,6 +90,21 @@ target_link_libraries(R6BotIkDemoNode
 
 target_compile_options(R6BotIkDemoNode PUBLIC ${FLAGS})
 
+add_executable(BasicInverseKinematics
+  examples/BasicInverseKinematics.cpp
+)
+
+ament_target_dependencies(BasicInverseKinematics
+  ament_index_cpp
+  ${THIS_PACKAGE_DEPENDS}
+)
+
+target_link_libraries(BasicInverseKinematics
+  ${PROJECT_NAME}
+)
+
+target_compile_options(BasicInverseKinematics PRIVATE ${FLAGS})
+
 #########################
 ###   CLANG TOOLING   ###
 #########################
@@ -119,6 +134,7 @@ install(TARGETS
 
 install(TARGETS
   R6BotIkDemoNode
+  BasicInverseKinematics
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -175,6 +191,12 @@ if(BUILD_TESTING)
   target_include_directories(${PROJECT_NAME}_test PRIVATE test/include)
   target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
   target_compile_options(${PROJECT_NAME}_test PUBLIC ${FLAGS})
+
+  add_test(
+    NAME BasicInverseKinematicsExampleTest
+    COMMAND BasicInverseKinematics
+      "${CMAKE_CURRENT_SOURCE_DIR}/test/models/r6bot/r6bot.urdf"
+  )
 
   if(ACTIVE_BENCHMARKS)
     find_package(ament_cmake_google_benchmark REQUIRED)
