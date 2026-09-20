@@ -9,6 +9,42 @@
 
 using namespace multi_end_effector_kinematics;
 
+namespace
+{
+  Eigen::VectorXd randomJointPositionsWithinLimits(const pinocchio::Model& model, std::mt19937& generator)
+  {
+    constexpr double samplingMargin = 0.2;
+
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+
+    Eigen::VectorXd q(model.nq);
+
+    for(Eigen::Index i = 0; i < q.size(); ++i)
+    {
+      const double lowerLimit = std::max(model.lowerPositionLimit[i] + samplingMargin, -M_PI_2);
+
+      const double upperLimit = std::min(model.upperPositionLimit[i] - samplingMargin, M_PI_2);
+
+      q[i] = lowerLimit + distribution(generator) * (upperLimit - lowerLimit);
+    }
+
+    return q;
+  }
+
+  Eigen::VectorXd randomJointDelta(Eigen::Index size, std::mt19937& generator)
+  {
+    std::uniform_real_distribution<double> distribution(-0.05, 0.05);
+
+    Eigen::VectorXd dq(size);
+
+    for(Eigen::Index i = 0; i < size; ++i)
+    {
+      dq[i] = distribution(generator);
+    }
+
+    return dq;
+  }
+}
 
 static constexpr ocs2::scalar_t tolerance = 1e-3;
 static constexpr size_t numTests = 100;
@@ -60,14 +96,20 @@ TEST(MultEndEffectorKinematicsTest, calculateJointPositionsThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
   urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
-  
+
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
   std::string leftForwardFeet = "LFF_link";
   std::string rightRearFeet = "RRF_link";
   std::string leftRearFeet = "LRF_link";
-  std::vector<std::string> threeDofLinks{rightForwardFeet, rightRearFeet, leftForwardFeet, leftRearFeet};
-  std::vector<std::string> sixDofLinks;
+
+  std::vector<std::string> threeDofLinks{
+    rightForwardFeet,
+    rightRearFeet,
+    leftForwardFeet,
+    leftRearFeet
+  };
+
   std::string solverName = "NewtonRaphson";
 
   KinematicsModelSettings modelSettings;
@@ -75,49 +117,61 @@ TEST(MultEndEffectorKinematicsTest, calculateJointPositionsThreeDoF)
   modelSettings.threeDofEndEffectorNames = threeDofLinks;
 
   InverseSolverSettings solverSettings;
-  solverSettings.dampingCoefficient = 1e-6;
+  solverSettings.dampingCoefficient = 1e-3;
   solverSettings.stepCoefficient = 0.8;
   solverSettings.tolerance = 1e-5;
   solverSettings.maxIterations = 1000;
-  MultiEndEffectorKinematicsTest kinematicsTest(urdfPathName, modelSettings, 
-    solverSettings, solverName);
+
+  MultiEndEffectorKinematicsTest kinematicsTest(urdfPathName, modelSettings, solverSettings, solverName);
 
   ocs2::PinocchioInterface pinocchioInterface = kinematicsTest.getPinocchioInterface();
 
   const pinocchio::Model& model = pinocchioInterface.getModel();
+
   pinocchio::Data& data = pinocchioInterface.getData();
 
   std::vector<size_t> endEffectorIndexes;
 
-  for(const auto& name: threeDofLinks)
+  for(const auto& name : threeDofLinks)
   {
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  std::mt19937 generator(42);
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
-    Eigen::VectorXd dq = Eigen::VectorXd::Random(model.nq) / 10;
+    const Eigen::VectorXd q = randomJointPositionsWithinLimits(model, generator);
 
-    pinocchio::framesForwardKinematics(model, data, q + dq);
+    const Eigen::VectorXd dq = randomJointDelta(model.nq, generator);
+
+    const Eigen::VectorXd targetQ = q + dq;
+
+    ASSERT_TRUE(kinematicsTest.checkPositionBounds(q));
+
+    ASSERT_TRUE(kinematicsTest.checkPositionBounds(targetQ));
+
+    pinocchio::framesForwardKinematics(model, data, targetQ);
 
     std::vector<Eigen::Vector3d> threeDofPositions;
 
-    for(size_t i = 0; i < 4; ++i)
+    for(size_t j = 0; j < endEffectorIndexes.size(); ++j)
     {
-      threeDofPositions.push_back(data.oMf[endEffectorIndexes[i]].translation());
+      threeDofPositions.push_back(data.oMf[endEffectorIndexes[j]].translation());
     }
 
     Eigen::VectorXd qInverse;
+
     const auto result = kinematicsTest.calculateJointPositions(q, threeDofPositions, qInverse);
 
+    ASSERT_TRUE(result.success);
+    ASSERT_EQ(result.flag, TaskReturnFlag::FINISHED);
+
     pinocchio::framesForwardKinematics(model, data, qInverse);
-    for(size_t i = 0; i < 4; ++i)
+
+    for(size_t j = 0; j < endEffectorIndexes.size(); ++j)
     {
-      EXPECT_TRUE(threeDofPositions[i].isApprox(data.oMf[endEffectorIndexes[i]].translation(), tolerance));
+      EXPECT_TRUE(threeDofPositions[j].isApprox(data.oMf[endEffectorIndexes[j]].translation(), tolerance));
     }
-    EXPECT_TRUE(result.success == true);
-    EXPECT_TRUE(result.flag == TaskReturnFlag::FINISHED);
   }
 }
 
@@ -159,9 +213,10 @@ TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  std::mt19937 generator(42);
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
+    Eigen::VectorXd q = randomJointPositionsWithinLimits(model, generator);
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv) * M_PI;
 
     std::vector<Eigen::Vector3d> threeDofVelocities;
@@ -227,9 +282,10 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  std::mt19937 generator(42);
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
+    Eigen::VectorXd q = randomJointPositionsWithinLimits(model, generator);
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv) * M_PI;
 
     std::vector<Eigen::Vector3d> threeDofVelocities;
@@ -293,10 +349,10 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorPosesThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  std::mt19937 generator(42);
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
-
+    Eigen::VectorXd q = randomJointPositionsWithinLimits(model, generator);
     std::vector<Eigen::Vector3d> threeDofPositions;
     pinocchio::framesForwardKinematics(model, data, q);
     for(size_t i = 0; i < 4; ++i)
@@ -346,7 +402,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointPositionsSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd dq = Eigen::VectorXd::Random(model.nq) / 10;
@@ -395,7 +451,7 @@ TEST(MultEndEffectorKinematicsTest, calculateJointVelocitiesSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
@@ -448,7 +504,7 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorPosesSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
 
@@ -497,7 +553,7 @@ TEST(MultEndEffectorKinematicsTest, calculateEndEffectorVelocitiesSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
@@ -640,10 +696,6 @@ TEST(MultEndEffectorKinematicsTest, R6BotConvergesToConfiguredTargetPose)
 
   const auto fkStatus = kinematics.calculateEndEffectorPoses(solvedJointPositions, achievedPoses);
   
-  const double positionError = (achievedPoses.front().translation() - targetPoses.front().translation()).norm();
-  const pinocchio::SE3 poseError = achievedPoses.front().actInv(targetPoses.front());
-  const double poseErrorNorm = pinocchio::log6(poseError).toVector().norm();
-
   ASSERT_TRUE(fkStatus.success) << fkStatus.toString();
 
   EXPECT_TRUE(achievedPoses.front().translation().isApprox(targetPoses.front().translation(), tolerance));
