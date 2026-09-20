@@ -749,7 +749,7 @@ namespace multi_end_effector_kinematics
 
     for(size_t i = 0; i < jointNumber; ++i)
     {
-      if(std::abs(jointDeltas[i] > model.velocityLimit[i])) return false;
+      if(std::abs(jointDeltas[i]) > model.velocityLimit[i]) return false;
     }
     
     return true;
