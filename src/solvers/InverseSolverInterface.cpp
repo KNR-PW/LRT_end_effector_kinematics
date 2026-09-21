@@ -8,11 +8,19 @@ namespace multi_end_effector_kinematics
   InverseSolverInterface::InverseSolverInterface(ocs2::PinocchioInterface& pinocchioInterface,
     const KinematicsInternalModelSettings& modelInternalSettings, const InverseSolverSettings& solverSettings):
     pinocchioInterface_(&pinocchioInterface), modelInternalSettings_(modelInternalSettings), solverSettings_(solverSettings)
-  {
-    const auto& model = pinocchioInterface.getModel();
-    
+  {    
     const size_t outputDim = 3 * modelInternalSettings.numThreeDofEndEffectors + 6 * modelInternalSettings.numSixDofEndEffectors;
-    const size_t jointDofDim = model.nv;
+    size_t jointDofDim = 0;
+
+    for(const auto& group : modelInternalSettings.kinematicGroups)
+    {
+      if(group.taskIndices.size() > group.jointVelocityIndices.size())
+      {
+        throw std::logic_error("InverseSolverInterface: Kinematic group has fewer DoFs than task dimensions, not supported!");
+      }
+
+      jointDofDim += group.jointVelocityIndices.size();
+    }
 
     bool redundant = jointDofDim > outputDim;
     bool normal = jointDofDim == outputDim;
@@ -42,8 +50,7 @@ namespace multi_end_effector_kinematics
     }
     else
     {
-      throw std::logic_error("InverseSolverInterface: Task is overconstrained, "
-        "not supported!");
+      throw std::logic_error("InverseSolverInterface: Task has fewer available DoFs than task dimensions, not supported!");
     }
   }
 
@@ -64,7 +71,7 @@ namespace multi_end_effector_kinematics
 
     const size_t rowSize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 6 * modelInternalSettings_.numSixDofEndEffectors;
 
-    Eigen::MatrixXd jacobian(rowSize, model.nq);
+    Eigen::MatrixXd jacobian(rowSize, model.nv);
 
     for(size_t i = 0; i < modelInternalSettings_.numThreeDofEndEffectors; ++i)
     {

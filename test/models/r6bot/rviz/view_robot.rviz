@@ -167,6 +167,16 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: IK Target
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /ik_demo_markers
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255

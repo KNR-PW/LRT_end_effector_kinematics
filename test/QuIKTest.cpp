@@ -16,7 +16,7 @@ static constexpr size_t numTests = 20;
 TEST(QuIKTest, Constructor)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -47,7 +47,7 @@ TEST(QuIKTest, Constructor)
     solverSettings, solverName), std::invalid_argument);
 
   urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   modelSettings.threeDofEndEffectorNames[0] = "aaaa";
   EXPECT_THROW(MultiEndEffectorKinematics(urdfPathName, modelSettings, 
@@ -59,7 +59,7 @@ TEST(QuIKTest, Constructor)
 TEST(QuIKTest, calculateJointPositionsThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -124,7 +124,7 @@ TEST(QuIKTest, calculateJointPositionsThreeDoF)
 TEST(QuIKTest, calculateJointVelocitiesThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -192,7 +192,7 @@ TEST(QuIKTest, calculateJointVelocitiesThreeDoF)
 TEST(QuIKTest, calculateEndEffectorVelocitiesThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -258,7 +258,7 @@ TEST(QuIKTest, calculateEndEffectorVelocitiesThreeDoF)
 TEST(QuIKTest, calculateEndEffectorPosesThreeDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/meldog/meldog_no_base_link.urdf";
+  urdfPathName += "/test/models/meldog/meldog_no_base_link.urdf";
   
   std::string baseLinkName = "trunk_link";
   std::string rightForwardFeet = "RFF_link";
@@ -320,7 +320,7 @@ TEST(QuIKTest, calculateEndEffectorPosesThreeDoF)
 TEST(QuIKTest, calculateJointPositionsSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "QuIK";
@@ -370,7 +370,7 @@ TEST(QuIKTest, calculateJointPositionsSixDoF)
 TEST(QuIKTest, calculateJointVelocitiesSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "QuIK";
@@ -423,7 +423,7 @@ TEST(QuIKTest, calculateJointVelocitiesSixDoF)
 TEST(QuIKTest, calculateEndEffectorPosesSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "QuIK";
@@ -472,7 +472,7 @@ TEST(QuIKTest, calculateEndEffectorPosesSixDoF)
 TEST(QuIKTest, calculateEndEffectorVelocitiesSixDoF)
 {
   std::string urdfPathName = package_path::getPath();
-  urdfPathName += "/../install/multi_end_effector_kinematics/share/multi_end_effector_kinematics/models/r6bot/r6bot.urdf";
+  urdfPathName += "/test/models/r6bot/r6bot.urdf";
   
   std::string baseLinkName = "world";
   std::string solverName = "QuIK";

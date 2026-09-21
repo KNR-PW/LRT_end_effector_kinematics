@@ -338,6 +338,8 @@ namespace multi_end_effector_kinematics
     
     private:
 
+      void initializeKinematicGroups(const pinocchio::Model& model);
+
       Eigen::VectorXd getErrorPoses(
         const std::vector<Eigen::Vector3d>& endEffectorPositions,
         const std::vector<pinocchio::SE3>& endEffectorTransforms);

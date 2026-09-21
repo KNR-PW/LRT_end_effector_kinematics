@@ -136,7 +136,105 @@ namespace multi_end_effector_kinematics
       modelInternalSettings_.endEffectorJointIndices.push_back(sixDofEndEffectorJointIndex);
     }
 
+    initializeKinematicGroups(model);
+
     solverImplementation_ = makeSolver(solverName);
+  }
+
+  /******************************************************************************************************/
+  /******************************************************************************************************/
+  /******************************************************************************************************/
+  void MultiEndEffectorKinematics::initializeKinematicGroups(const pinocchio::Model& model)
+  {
+    modelInternalSettings_.endEffectorJointVelocityIndices.clear();
+    modelInternalSettings_.endEffectorJointVelocityIndices.resize(modelInternalSettings_.numEndEffectors);
+    modelInternalSettings_.kinematicGroups.clear();
+
+    for(size_t i = 0; i < modelInternalSettings_.numEndEffectors; ++i)
+    {
+      auto& jointVelocityIndices = modelInternalSettings_.endEffectorJointVelocityIndices[i];
+      size_t jointIndex = modelInternalSettings_.endEffectorJointIndices[i];
+
+      while(jointIndex > 0)
+      {
+        const auto& jointModel = model.joints[jointIndex];
+        const int jointVelocityStartIndex = jointModel.idx_v();
+        const int jointVelocityDimension = jointModel.nv();
+
+        for(int j = 0; j < jointVelocityDimension; ++j)
+        {
+          jointVelocityIndices.push_back(static_cast<size_t>(jointVelocityStartIndex + j));
+        }
+
+        jointIndex = model.parents[jointIndex];
+      }
+
+      std::sort(jointVelocityIndices.begin(), jointVelocityIndices.end());
+      jointVelocityIndices.erase(std::unique(jointVelocityIndices.begin(), jointVelocityIndices.end()), jointVelocityIndices.end());
+    }
+
+    std::vector<bool> assignedToGroup(modelInternalSettings_.numEndEffectors, false);
+
+    for(size_t i = 0; i < modelInternalSettings_.numEndEffectors; ++i)
+    {
+      if(assignedToGroup[i])
+      {
+        continue;
+      }
+
+      KinematicGroup group;
+      std::vector<size_t> endEffectorsToVisit{i};
+      assignedToGroup[i] = true;
+
+      while(!endEffectorsToVisit.empty())
+      {
+        const size_t currentEndEffectorIndex = endEffectorsToVisit.back();
+        endEffectorsToVisit.pop_back();
+
+        group.endEffectorIndices.push_back(currentEndEffectorIndex);
+
+        const auto& currentJointVelocityIndices = modelInternalSettings_.endEffectorJointVelocityIndices[currentEndEffectorIndex];
+        group.jointVelocityIndices.insert(group.jointVelocityIndices.end(), currentJointVelocityIndices.begin(), currentJointVelocityIndices.end());
+
+        for(size_t candidateEndEffectorIndex = 0; candidateEndEffectorIndex < modelInternalSettings_.numEndEffectors; ++candidateEndEffectorIndex)
+        {
+          if(assignedToGroup[candidateEndEffectorIndex])
+          {
+            continue;
+          }
+
+          const auto& candidateJointVelocityIndices = modelInternalSettings_.endEffectorJointVelocityIndices[candidateEndEffectorIndex];
+
+          const bool sharesJoint = std::any_of(currentJointVelocityIndices.begin(), currentJointVelocityIndices.end(), [&](size_t jointVelocityIndex)
+          {
+            return std::binary_search(candidateJointVelocityIndices.begin(), candidateJointVelocityIndices.end(), jointVelocityIndex);
+          });
+
+          if(sharesJoint)
+          {
+            assignedToGroup[candidateEndEffectorIndex] = true;
+            endEffectorsToVisit.push_back(candidateEndEffectorIndex);
+          }
+        }
+      }
+
+      std::sort(group.endEffectorIndices.begin(), group.endEffectorIndices.end());
+      std::sort(group.jointVelocityIndices.begin(), group.jointVelocityIndices.end());
+      group.jointVelocityIndices.erase(std::unique(group.jointVelocityIndices.begin(), group.jointVelocityIndices.end()), group.jointVelocityIndices.end());
+
+      for(const size_t endEffectorIndex : group.endEffectorIndices)
+      {
+        const size_t endEffectorDimension = endEffectorIndex < modelInternalSettings_.numThreeDofEndEffectors ? 3 : 6;
+        const size_t rowStartIndex = endEffectorIndex < modelInternalSettings_.numThreeDofEndEffectors ? 3 * endEffectorIndex : 3 * modelInternalSettings_.numThreeDofEndEffectors + 6 * (endEffectorIndex - modelInternalSettings_.numThreeDofEndEffectors);
+
+        for(size_t rowIndex = 0; rowIndex < endEffectorDimension; ++rowIndex)
+        {
+          group.taskIndices.push_back(rowStartIndex + rowIndex);
+        }
+      }
+
+      modelInternalSettings_.kinematicGroups.push_back(std::move(group));
+    }
   }
 
   /******************************************************************************************************/
@@ -238,7 +336,7 @@ namespace multi_end_effector_kinematics
 
     assert(actualJointPositions.rows() == model.nq);
     
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
+    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS, 0};
 
     if(!checkPositionBounds(actualJointPositions))
     {
@@ -293,6 +391,11 @@ namespace multi_end_effector_kinematics
       }
       
       iteration++;
+    }
+
+    if(returnValue.flag == TaskReturnFlag::IN_PROGRESS)
+    {
+      returnValue.iterations = iteration;
     }
     
     return returnValue;
@@ -627,8 +730,10 @@ namespace multi_end_effector_kinematics
 
     for(size_t i = 0; i < jointNumber; ++i)
     {
-      if(newJointPositions[i] > model.upperPositionLimit[i] && 
-        newJointPositions[i] < model.lowerPositionLimit[i]) return false;
+      if(newJointPositions[i] > model.upperPositionLimit[i] || newJointPositions[i] < model.lowerPositionLimit[i])
+      {
+        return false;
+      }
     }
 
     return true;
