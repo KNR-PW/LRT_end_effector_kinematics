@@ -160,6 +160,14 @@ Possible task flags include:
 
 The package contains a ROS 2 demo showing iterative inverse kinematics on the R6Bot model in RViz.
 
+<p align="center">
+  <img src="docs/media/r6bot_ik_demo.gif"
+       alt="R6Bot inverse kinematics visualization"
+       width="800"/>
+</p>
+
+The animation shows the robot iteratively converging to the requested TCP pose while visualizing the target and the TCP trajectory.
+
 After building and sourcing the workspace, run:
 
 ```bash

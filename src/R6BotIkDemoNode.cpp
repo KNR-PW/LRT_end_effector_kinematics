@@ -322,9 +322,9 @@ private:
     marker.pose.position.z = targetPosition.z();
     marker.pose.orientation.w = 1.0;
 
-    marker.scale.x = 0.6;
-    marker.scale.y = 0.6;
-    marker.scale.z = 0.6;
+    marker.scale.x = 0.08;
+    marker.scale.y = 0.08;
+    marker.scale.z = 0.08;
 
     marker.color.r = 1.0F;
     marker.color.g = 0.0F;
