@@ -9,6 +9,26 @@
 
 using namespace multi_end_effector_kinematics;
 
+namespace
+{
+  Eigen::VectorXd randomJointPositionsWithinLimits(const pinocchio::Model& model)
+  {
+    constexpr double samplingMargin = 0.2;
+
+    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq);
+
+    for(Eigen::Index i = 0; i < q.size(); ++i)
+    {
+      const double lowerLimit = std::max(model.lowerPositionLimit[i] + samplingMargin, -M_PI_2);
+
+      const double upperLimit = std::min(model.upperPositionLimit[i] - samplingMargin, M_PI_2);
+
+      q[i] = lowerLimit + 0.5 * (q[i] + 1.0) * (upperLimit - lowerLimit);
+    }
+
+    return q;
+  }
+}
 
 static constexpr ocs2::scalar_t tolerance = 1e-3;
 static constexpr size_t numTests = 20;
@@ -75,7 +95,7 @@ TEST(QuIKTest, calculateJointPositionsThreeDoF)
   modelSettings.threeDofEndEffectorNames = threeDofLinks;
 
   InverseSolverSettings solverSettings;
-  solverSettings.dampingCoefficient = 1e-6;
+  solverSettings.dampingCoefficient = 1e-3;
   solverSettings.stepCoefficient = 0.8;
   solverSettings.tolerance = 1e-5;
   solverSettings.maxIterations = 1000;
@@ -94,9 +114,9 @@ TEST(QuIKTest, calculateJointPositionsThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
+    const Eigen::VectorXd q = randomJointPositionsWithinLimits(model);
     Eigen::VectorXd dq = Eigen::VectorXd::Random(model.nq) / 10;
 
     pinocchio::framesForwardKinematics(model, data, q + dq);
@@ -159,29 +179,33 @@ TEST(QuIKTest, calculateJointVelocitiesThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
+    Eigen::VectorXd q = randomJointPositionsWithinLimits(model);
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv) * M_PI;
 
     std::vector<Eigen::Vector3d> threeDofVelocities;
     pinocchio::forwardKinematics(model, data, q, v);
-    for(size_t i = 0; i < 4; ++i)
+    for(size_t j = 0; j < endEffectorIndexes.size(); ++j)
     {
       threeDofVelocities.push_back(pinocchio::getFrameVelocity(model, data, 
-        endEffectorIndexes[i], pinocchio::LOCAL_WORLD_ALIGNED).linear());
+        endEffectorIndexes[j], pinocchio::LOCAL_WORLD_ALIGNED).linear());
     }
 
     Eigen::VectorXd vInverse;
     const auto result = kinematicsTest.calculateJointVelocities(q, threeDofVelocities, vInverse);
 
+    ASSERT_TRUE(result.success) << result.toString();
+
+    ASSERT_EQ(result.flag, TaskReturnFlag::FINISHED) << result.toString();
+
     pinocchio::forwardKinematics(model, data, q, vInverse);
-    for(size_t i = 0; i < 4; ++i)
+    for(size_t j = 0; j < endEffectorIndexes.size(); ++j)
     {
       const Eigen::Vector3d newVelocity = pinocchio::getFrameVelocity(model, data, 
-        endEffectorIndexes[i], pinocchio::LOCAL_WORLD_ALIGNED).linear();
+        endEffectorIndexes[j], pinocchio::LOCAL_WORLD_ALIGNED).linear();
 
-      EXPECT_TRUE(threeDofVelocities[i].isApprox(newVelocity, tolerance));
+      EXPECT_TRUE(threeDofVelocities[j].isApprox(newVelocity, tolerance));
     }
 
     EXPECT_TRUE(result.success == true);
@@ -227,9 +251,9 @@ TEST(QuIKTest, calculateEndEffectorVelocitiesThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
+    Eigen::VectorXd q = randomJointPositionsWithinLimits(model);
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv) * M_PI;
 
     std::vector<Eigen::Vector3d> threeDofVelocities;
@@ -244,6 +268,10 @@ TEST(QuIKTest, calculateEndEffectorVelocitiesThreeDoF)
       zeroVelocity, zeroVelocity};
    
     const auto result = kinematicsTest.calculateEndEffectorVelocities(q, v, newVelocities);
+
+    ASSERT_TRUE(result.success) << result.toString();
+
+    ASSERT_EQ(result.flag, TaskReturnFlag::FINISHED) << result.toString();
 
     for(size_t i = 0; i < 4; ++i)
     {
@@ -293,9 +321,9 @@ TEST(QuIKTest, calculateEndEffectorPosesThreeDoF)
     endEffectorIndexes.push_back(model.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
-    Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
+    Eigen::VectorXd q = randomJointPositionsWithinLimits(model);
 
     std::vector<Eigen::Vector3d> threeDofPositions;
     pinocchio::framesForwardKinematics(model, data, q);
@@ -307,6 +335,9 @@ TEST(QuIKTest, calculateEndEffectorPosesThreeDoF)
     std::vector<Eigen::Vector3d> newPositions(4);
     const auto result = kinematicsTest.calculateEndEffectorPoses(q, newPositions);
 
+    ASSERT_TRUE(result.success) << result.toString();
+    ASSERT_EQ(result.flag, TaskReturnFlag::FINISHED) << result.toString();
+    
     for(size_t i = 0; i < 4; ++i)
     {
       EXPECT_TRUE(threeDofPositions[i].isApprox(newPositions[i], tolerance));
@@ -346,7 +377,7 @@ TEST(QuIKTest, calculateJointPositionsSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd dq = Eigen::VectorXd::Random(model.nq) / 20;
@@ -359,7 +390,6 @@ TEST(QuIKTest, calculateJointPositionsSixDoF)
     const auto result = kinematicsTest.calculateJointPositions(q, targetTransforms, qInverse);
 
     pinocchio::framesForwardKinematics(model, data, qInverse);
-    std::cerr << result.toString() << std::endl;
     EXPECT_TRUE(targetTransforms[0].isApprox(data.oMf[endEffectorIndex], tolerance));
 
     EXPECT_TRUE(result.success == true);
@@ -396,7 +426,7 @@ TEST(QuIKTest, calculateJointVelocitiesSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
@@ -449,7 +479,7 @@ TEST(QuIKTest, calculateEndEffectorPosesSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
 
@@ -498,7 +528,7 @@ TEST(QuIKTest, calculateEndEffectorVelocitiesSixDoF)
 
   const size_t endEffectorIndex = model.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(model.nq) * M_PI_2;
     Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
