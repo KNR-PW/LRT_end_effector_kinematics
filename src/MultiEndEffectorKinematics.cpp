@@ -254,7 +254,7 @@ namespace multi_end_effector_kinematics
 
     assert(actualJointPositions.rows() == model.nq);
 
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
+    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS, 0};
 
     if(!checkPositionBounds(actualJointPositions))
     {
@@ -439,11 +439,7 @@ namespace multi_end_effector_kinematics
     assert(endEffectorVelocities.size() == modelInternalSettings_.numThreeDofEndEffectors);
     assert(endEffectorTwists.size() == modelInternalSettings_.numSixDofEndEffectors);
 
-    const auto& model = pinocchioInterface_->getModel();
-
-    assert(actualJointPositions.rows() == model.nq);
-
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
+    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS, 0};
 
     if(!checkPositionBounds(actualJointPositions))
     {
@@ -518,7 +514,7 @@ namespace multi_end_effector_kinematics
 
     assert(actualJointPositions.rows() == model.nq);
 
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
+    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS, 0};
 
     if(!checkPositionBounds(actualJointPositions))
     {
@@ -591,7 +587,7 @@ namespace multi_end_effector_kinematics
     assert(actualJointPositions.rows() == model.nq);
     assert(actualJointVelocities.rows() == model.nv);
 
-    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS};
+    ReturnStatus returnValue{true, TaskReturnFlag::IN_PROGRESS, 0};
 
     if(!checkPositionBounds(actualJointPositions))
     {
@@ -699,8 +695,6 @@ namespace multi_end_effector_kinematics
     const std::vector<Eigen::Vector3d>& endEffectorVelocities, 
     const std::vector<pinocchio::Motion>& endEffectorTwists)
   {
-    const auto& data = pinocchioInterface_->getData();
-
     const size_t velocitySize = 3 * modelInternalSettings_.numThreeDofEndEffectors + 
       6 * modelInternalSettings_.numSixDofEndEffectors;
 
@@ -749,7 +743,7 @@ namespace multi_end_effector_kinematics
 
     for(size_t i = 0; i < jointNumber; ++i)
     {
-      if(std::abs(jointDeltas[i] > model.velocityLimit[i])) return false;
+      if(std::abs(jointDeltas[i]) > model.velocityLimit[i]) return false;
     }
     
     return true;

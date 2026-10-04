@@ -3,7 +3,6 @@ from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-
 def generate_launch_description():
     robot_description_content = Command(
         [
@@ -49,9 +48,9 @@ def generate_launch_description():
             {
                 "solver_name": "NewtonRaphson",
                 "step_coefficient": 0.8,
-                "initial_joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,],
-                "target_position": [-0.091895, -0.627343, 1.622792,],
-                "target_orientation_rpy": [1.044101, -0.709588, -1.391157,],
+                "initial_joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "target_position": [-0.091895, -0.627343, 1.622792],
+                "target_orientation_rpy": [1.044101, -0.709588, -1.391157],
                 "iteration_period_ms": 500,
                 "max_demo_iterations": 200,
             }
@@ -66,10 +65,8 @@ def generate_launch_description():
         arguments=["-d", rviz_config_file],
     )
 
-    return LaunchDescription(
-        [
-            robot_state_publisher_node,
-            ik_demo_node,
-            rviz_node,
-        ]
-    )
+    return LaunchDescription([
+        robot_state_publisher_node,
+        rviz_node,
+        ik_demo_node,
+    ])

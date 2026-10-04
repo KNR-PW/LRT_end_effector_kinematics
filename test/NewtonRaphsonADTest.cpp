@@ -54,7 +54,7 @@ TEST(NewtonRaphsonTestAD, threeDofGradient)
     endEffectorIndexes.push_back(modelTrue.getFrameId(name));
   }
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(modelTrue.nq);
     
@@ -114,7 +114,7 @@ TEST(NewtonRaphsonTestAD, SixDofGradient)
 
   size_t endEffectorIndex = modelTrue.getFrameId("tool0");
 
-  for(int i = 0; i < numTests; ++i)
+  for(size_t i = 0; i < numTests; ++i)
   {
     Eigen::VectorXd q = Eigen::VectorXd::Random(modelTrue.nq);
   
